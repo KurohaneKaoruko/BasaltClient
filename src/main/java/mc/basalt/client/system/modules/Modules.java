@@ -14,6 +14,7 @@ import mc.basalt.client.system.modules.combat.Criticals;
 import mc.basalt.client.system.modules.combat.Killaura;
 import mc.basalt.client.system.modules.combat.Velocity;
 import mc.basalt.client.system.modules.misc.Timer;
+import mc.basalt.client.system.modules.movement.EntityControl;
 import mc.basalt.client.system.modules.movement.Flight;
 import mc.basalt.client.system.modules.movement.Jesus;
 import mc.basalt.client.system.modules.movement.NoFall;
@@ -22,6 +23,7 @@ import mc.basalt.client.system.modules.movement.Scaffold;
 import mc.basalt.client.system.modules.movement.Speed;
 import mc.basalt.client.system.modules.movement.Sprint;
 import mc.basalt.client.system.modules.movement.Step;
+import mc.basalt.client.system.modules.player.Blink;
 import mc.basalt.client.system.modules.player.ChestStealer;
 import mc.basalt.client.system.modules.player.FastPlace;
 import mc.basalt.client.system.modules.render.ESP;
@@ -29,6 +31,7 @@ import mc.basalt.client.system.modules.render.Freecam;
 import mc.basalt.client.system.modules.render.Fullbright;
 import mc.basalt.client.system.modules.render.Nametags;
 import mc.basalt.client.system.modules.render.Tracers;
+import mc.basalt.client.system.modules.render.XRay;
 import org.lwjgl.glfw.GLFW;
 
 public class Modules {
@@ -60,6 +63,7 @@ public class Modules {
         add(new Jesus());
         add(new Scaffold());
         add(new SafeWalk());
+        add(new EntityControl());
 
         // Misc
         add(new Timer());
@@ -69,10 +73,12 @@ public class Modules {
         add(new Tracers());
         add(new Nametags());
         add(new Freecam());
+        add(new XRay());
 
         // Player
         add(new FastPlace());
         add(new ChestStealer());
+        add(new Blink());
 
         EventBus.subscribe(this);
     }

@@ -41,6 +41,8 @@ public class BasaltClient implements ClientModInitializer {
     public static float TIMER = 1.0f;
     public static boolean FREECAM_ENABLED = false;
     public static boolean SAFEWALK_ENABLED = false;
+    public static boolean FULLBRIGHT_ENABLED = false;
+    public static boolean XRAY_ENABLED = false;
     public static double FREECAM_X, FREECAM_Y, FREECAM_Z;
     public static float FREECAM_YAW, FREECAM_PITCH;
     public static KeyBinding CLICK_GUI_KEY;

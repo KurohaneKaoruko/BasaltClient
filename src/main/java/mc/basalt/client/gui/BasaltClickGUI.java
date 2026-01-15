@@ -1,5 +1,6 @@
 package mc.basalt.client.gui;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import mc.basalt.client.BasaltClient;
 import mc.basalt.client.system.modules.Category;
 import mc.basalt.client.system.modules.Module;
@@ -126,6 +127,10 @@ public class BasaltClickGUI extends Screen {
             logoWidth = Math.max(1, (int) Math.round((double) maxLogoSize * LOGO_TEXTURE_WIDTH / LOGO_TEXTURE_HEIGHT));
         }
 
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+
         context.drawTexture(
                 LOGO,
                 this.width - logoWidth - margin,
@@ -138,6 +143,8 @@ public class BasaltClickGUI extends Screen {
                 LOGO_TEXTURE_HEIGHT,
                 LOGO_TEXTURE_WIDTH,
                 LOGO_TEXTURE_HEIGHT);
+
+        RenderSystem.disableBlend();
     }
 
     @Override

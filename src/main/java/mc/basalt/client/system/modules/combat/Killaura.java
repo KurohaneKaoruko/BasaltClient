@@ -27,19 +27,23 @@ public class Killaura extends Module {
 
     @EventHandler
     public void onTick(TickEvent.Pre event) {
-        if (mc.player == null || mc.world == null) return;
+        if (mc.player == null || mc.world == null)
+            return;
 
         for (Entity entity : mc.world.getEntities()) {
             if (entity instanceof LivingEntity && entity != mc.player && entity.isAlive()) {
                 if (entity instanceof PlayerEntity) {
-                    if (!players.get()) continue;
+                    if (!players.get())
+                        continue;
                 } else {
-                    if (!mobs.get()) continue;
+                    if (!mobs.get())
+                        continue;
                 }
 
                 if (mc.player.distanceTo(entity) <= range.get()) {
                     if (autoDelay.get()) {
-                        if (mc.player.getAttackCooldownProgress(0.5f) < 1.0f) continue;
+                        if (mc.player.getAttackCooldownProgress(0.5f) < 1.0f)
+                            continue;
                     }
 
                     mc.interactionManager.attackEntity(mc.player, entity);
