@@ -3,7 +3,13 @@
 	"package": "mc.basalt.client.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-      "BasaltMixin"
+      "BasaltMixin",
+      "MixinMinecraftClient",
+      "MixinWorldRenderer",
+      "MixinClientConnection",
+      "MixinKeyboard",
+      "MixinInGameHud",
+      "IMinecraftClientAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1
