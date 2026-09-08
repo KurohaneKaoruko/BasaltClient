@@ -7,7 +7,7 @@ import net.minecraft.util.Mth;
 public abstract class HudElement {
     /** 屏幕锚点：元素位置 = 锚点 + 偏移，窗口尺寸变化时自动保持相对位置。 */
     public enum Anchor {
-        TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, BOTTOM_CENTER
+        TOP_LEFT, TOP_CENTER, TOP_RIGHT, MIDDLE_LEFT, MIDDLE_RIGHT, BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT
     }
 
     protected final Minecraft mc = Minecraft.getInstance();
@@ -63,6 +63,9 @@ public abstract class HudElement {
         int[][] points = {
                 {0, 0},                          // TOP_LEFT
                 {screenWidth, 0},                // TOP_RIGHT
+                {0, screenHeight / 2},           // MIDDLE_LEFT
+                {screenWidth, screenHeight / 2}, // MIDDLE_RIGHT
+                {screenWidth / 2, 0},            // TOP_CENTER
                 {0, screenHeight},               // BOTTOM_LEFT
                 {screenWidth, screenHeight},     // BOTTOM_RIGHT
                 {screenWidth / 2, screenHeight}  // BOTTOM_CENTER
@@ -94,6 +97,18 @@ public abstract class HudElement {
         switch (anchor) {
             case TOP_RIGHT -> {
                 baseX = screenWidth - w;
+                baseY = 0;
+            }
+            case MIDDLE_LEFT -> {
+                baseX = 0;
+                baseY = screenHeight / 2 - h / 2;
+            }
+            case MIDDLE_RIGHT -> {
+                baseX = screenWidth - w;
+                baseY = screenHeight / 2 - h / 2;
+            }
+            case TOP_CENTER -> {
+                baseX = screenWidth / 2 - w / 2 + getCenterExtraOffsetX(w);
                 baseY = 0;
             }
             case BOTTOM_LEFT -> {

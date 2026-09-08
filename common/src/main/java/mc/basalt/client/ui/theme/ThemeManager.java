@@ -20,6 +20,7 @@ public final class ThemeManager {
     private int listMode = LIST_ACCENT;
     private boolean hudBackground = true;
     private float hudBackgroundAlpha = 0.50f;
+    private String language = "zh";
 
     private ThemeManager() {
     }
@@ -109,5 +110,13 @@ public final class ThemeManager {
 
     public void setHudBackgroundAlpha(float hudBackgroundAlpha) {
         this.hudBackgroundAlpha = Math.max(0f, Math.min(1f, hudBackgroundAlpha));
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 }

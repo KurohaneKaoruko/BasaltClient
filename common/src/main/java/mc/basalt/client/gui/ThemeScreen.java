@@ -2,6 +2,7 @@ package mc.basalt.client.gui;
 
 import mc.basalt.client.system.config.ConfigManager;
 import mc.basalt.client.ui.notifications.NotificationManager;
+import mc.basalt.client.ui.theme.Lang;
 import mc.basalt.client.ui.theme.ThemeManager;
 import mc.basalt.client.utils.GuiUtil;
 import net.minecraft.client.gui.GuiGraphics;
@@ -55,7 +56,7 @@ public class ThemeScreen extends Screen {
     private int scrollOffset;
 
     public ThemeScreen(Screen parent) {
-        super(Component.literal("主题设置"));
+        super(Component.literal(Lang.get("主题设置", "Theme Settings")));
         this.parent = parent;
     }
 
@@ -78,16 +79,16 @@ public class ThemeScreen extends Screen {
         int y = windowY + 44;
 
         // ===== 主色调 =====
-        labels.add(new Label("主色调", x, y, TEXT_DIM));
+        labels.add(new Label(Lang.get("主色调", "Accent color"), x, y, TEXT_DIM));
         y += 14;
         Color c = new Color(theme.getAccentColor());
-        widgets.add(new Slider(x, y, CONTENT_WIDTH, SLIDER_H, "红", c.getRed(), 0, 255, 1,
+        widgets.add(new Slider(x, y, CONTENT_WIDTH, SLIDER_H, Lang.get("红", "R"), c.getRed(), 0, 255, 1,
                 (java.util.function.IntConsumer) v -> setRgb(v, null, null)));
         y += SLIDER_H + 4;
-        widgets.add(new Slider(x, y, CONTENT_WIDTH, SLIDER_H, "绿", c.getGreen(), 0, 255, 1,
+        widgets.add(new Slider(x, y, CONTENT_WIDTH, SLIDER_H, Lang.get("绿", "G"), c.getGreen(), 0, 255, 1,
                 (java.util.function.IntConsumer) v -> setRgb(null, v, null)));
         y += SLIDER_H + 4;
-        widgets.add(new Slider(x, y, CONTENT_WIDTH, SLIDER_H, "蓝", c.getBlue(), 0, 255, 1,
+        widgets.add(new Slider(x, y, CONTENT_WIDTH, SLIDER_H, Lang.get("蓝", "B"), c.getBlue(), 0, 255, 1,
                 (java.util.function.IntConsumer) v -> setRgb(null, null, v)));
         y += SLIDER_H + 8;
 
@@ -101,23 +102,23 @@ public class ThemeScreen extends Screen {
         y += ROW_GAP;
 
         // ===== 动态效果 =====
-        labels.add(new Label("动态效果", x, y, TEXT_DIM));
+        labels.add(new Label(Lang.get("动态效果", "Effects"), x, y, TEXT_DIM));
         y += 14;
-        widgets.add(new Toggle(x, y, CONTENT_WIDTH, BTN_H, "彩虹模式", theme.isRainbow(), on -> {
+        widgets.add(new Toggle(x, y, CONTENT_WIDTH, BTN_H, Lang.get("彩虹模式", "Rainbow"), theme.isRainbow(), on -> {
             theme.setRainbow(on);
             rebuild();
         }));
         y += BTN_H + 4;
-        widgets.add(new Slider(x, y, CONTENT_WIDTH, SLIDER_H, "循环速度",
+        widgets.add(new Slider(x, y, CONTENT_WIDTH, SLIDER_H, Lang.get("循环速度", "Cycle speed"),
                 theme.getRainbowSpeed(), 0.2f, 4.0f, 0.1f, theme::setRainbowSpeed));
         y += SLIDER_H + 8;
         sectionDividers.add(y);
         y += ROW_GAP;
 
         // ===== 模块列表 =====
-        labels.add(new Label("模块列表样式", x, y, TEXT_DIM));
+        labels.add(new Label(Lang.get("模块列表样式", "ArrayList style"), x, y, TEXT_DIM));
         y += 14;
-        String[] modes = {"主色", "白色", "彩虹"};
+        String[] modes = {Lang.get("主色", "Accent"), Lang.get("白色", "White"), Lang.get("彩虹", "Rainbow")};
         int third = CONTENT_WIDTH / 3;
         for (int i = 0; i < 3; i++) {
             int mode = i;
@@ -136,9 +137,9 @@ public class ThemeScreen extends Screen {
         // ===== HUD =====
         labels.add(new Label("HUD", x, y, TEXT_DIM));
         y += 14;
-        widgets.add(new Toggle(x, y, CONTENT_WIDTH, BTN_H, "列表背景", theme.isHudBackgroundEnabled(), theme::setHudBackgroundEnabled));
+        widgets.add(new Toggle(x, y, CONTENT_WIDTH, BTN_H, Lang.get("列表背景", "List background"), theme.isHudBackgroundEnabled(), theme::setHudBackgroundEnabled));
         y += BTN_H + 4;
-        widgets.add(new Slider(x, y, CONTENT_WIDTH, SLIDER_H, "背景不透明度",
+        widgets.add(new Slider(x, y, CONTENT_WIDTH, SLIDER_H, Lang.get("背景不透明度", "BG opacity"),
                 theme.getHudBackgroundAlpha(), 0f, 1f, 0.05f, theme::setHudBackgroundAlpha));
         y += SLIDER_H + 10;
 
@@ -171,6 +172,11 @@ public class ThemeScreen extends Screen {
         for (AbstractWidget w : widgets) {
             w.visible = w.getY() >= top - 2 && w.getY() + w.getHeight() <= bottom + 2;
         }
+    }
+
+    /** 禁用原版背景（毛玻璃）。 */
+    @Override
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
     }
 
     @Override
@@ -219,10 +225,10 @@ public class ThemeScreen extends Screen {
         boolean hover = mouseX >= x && mouseX <= x + CONTENT_WIDTH && mouseY >= by && mouseY <= by + 20;
         context.fill(x, by, x + CONTENT_WIDTH, by + 20, PANEL_BG);
         GuiUtil.border(context, x, by, CONTENT_WIDTH, 20, hover ? theme.accent() : 0xFF505058);
-        String done = "完成";
+        String done = Lang.get("完成", "Done");
         context.drawString(this.font, done, x + (CONTENT_WIDTH - this.font.width(done)) / 2, by + 6, 0xFFFFFFFF);
 
-        context.drawCenteredString(this.font, "修改实时生效 · 滚轮翻页 · ESC 退出并保存",
+        context.drawCenteredString(this.font, Lang.get("修改实时生效 · 滚轮翻页 · ESC 退出并保存", "Live · Scroll · ESC to save"),
                 this.width / 2, this.height - 12, 0x707070);
     }
 
