@@ -87,6 +87,13 @@ public final class BasaltClient {
         return PLATFORM != null ? PLATFORM.getModVersion() : "dev";
     }
 
+    /** GUI 显示用版本号：不带 MC 版本后缀（如 0.3.1+1.21.4 → 0.3.1）。 */
+    public static String displayVersion() {
+        String v = version();
+        int plus = v.indexOf('+');
+        return plus > 0 ? v.substring(0, plus) : v;
+    }
+
     @EventHandler
     public void onTickEnd(TickEvent.Post event) {
         if (MC == null) {

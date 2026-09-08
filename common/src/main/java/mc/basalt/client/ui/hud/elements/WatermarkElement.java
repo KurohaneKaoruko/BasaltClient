@@ -10,7 +10,7 @@ public class WatermarkElement extends HudElement {
     }
 
     private String text() {
-        return BasaltClient.NAME + " v" + BasaltClient.version();
+        return BasaltClient.NAME + " v" + BasaltClient.displayVersion();
     }
 
     @Override
