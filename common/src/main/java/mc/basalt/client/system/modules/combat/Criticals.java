@@ -34,8 +34,8 @@ public class Criticals extends Module {
                 double y = mc.player.getY();
                 double z = mc.player.getZ();
 
-                mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(x, y + 0.0625, z, false));
-                mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(x, y, z, false));
+                mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(x, y + 0.0625, z, false, false));
+                mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(x, y, z, false, false));
             } else if (mode.get().equals("Jump")) {
                 mc.player.jumpFromGround();
             }

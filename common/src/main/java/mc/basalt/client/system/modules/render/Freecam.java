@@ -6,14 +6,14 @@ import mc.basalt.client.event.events.TickEvent;
 import mc.basalt.client.system.modules.Category;
 import mc.basalt.client.system.modules.Module;
 import mc.basalt.client.system.settings.DoubleSetting;
-import net.minecraft.client.player.Input;
+import net.minecraft.client.player.ClientInput;
 import net.minecraft.util.Mth;
 
 public class Freecam extends Module {
     private final DoubleSetting speed = new DoubleSetting("速度", 1.0, 0.1, 5.0, 0.1);
 
     /** 保存被替换的玩家输入，关闭时恢复。 */
-    private Input originalInput;
+    private ClientInput originalInput;
 
     public Freecam() {
         super("Freecam", "自由视角", "相机脱离身体自由移动，身体停在原地。", Category.Render);
@@ -62,7 +62,7 @@ public class Freecam extends Module {
             originalInput = mc.player.input;
         }
         if (originalInput != null) {
-            mc.player.input = new Input();
+            mc.player.input = new ClientInput();
         }
         mc.player.setDeltaMovement(0, 0, 0);
 

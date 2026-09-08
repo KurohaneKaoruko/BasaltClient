@@ -33,14 +33,14 @@ public class Speed extends Module {
         }
 
         if ("Vanilla".equals(mode.get())) {
-            if (mc.player.onGround() && !mc.player.input.jumping) {
+            if (mc.player.onGround() && !mc.player.input.keyPresses.jump()) {
                 mc.player.jumpFromGround();
             }
         } else if ("Strafe".equals(mode.get())) {
             if (mc.player.onGround()) {
                 mc.player.jumpFromGround();
                 applyStrafe(forward, strafe);
-            } else if (!mc.player.input.jumping) {
+            } else if (!mc.player.input.keyPresses.jump()) {
                 // 空中保持水平速度（原版空中仅 0.02/tick 的控制力）
                 applyStrafe(forward, strafe);
             }

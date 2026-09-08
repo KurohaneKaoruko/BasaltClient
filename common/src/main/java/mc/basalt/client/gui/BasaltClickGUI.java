@@ -9,6 +9,7 @@ import mc.basalt.client.system.modules.Module;
 import mc.basalt.client.system.modules.Modules;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -285,15 +286,14 @@ public class BasaltClickGUI extends Screen {
         }
 
         context.blit(
+                RenderType::guiTextured,
                 LOGO,
                 this.width - logoWidth - margin,
                 this.height - logoHeight - margin,
+                0.0f,
+                0.0f,
                 logoWidth,
                 logoHeight,
-                0.0f,
-                0.0f,
-                LOGO_TEXTURE_WIDTH,
-                LOGO_TEXTURE_HEIGHT,
                 LOGO_TEXTURE_WIDTH,
                 LOGO_TEXTURE_HEIGHT
         );
