@@ -1,9 +1,11 @@
 package mc.basalt.client.ui.hud;
 
+import mc.basalt.client.gui.HudEditorScreen;
 import mc.basalt.client.ui.hud.elements.ArrayListElement;
 import mc.basalt.client.ui.hud.elements.ArmorStatusElement;
 import mc.basalt.client.ui.hud.elements.InfoElement;
 import mc.basalt.client.ui.hud.elements.WatermarkElement;
+import mc.basalt.client.ui.notifications.NotificationManager;
 import net.minecraft.client.gui.DrawContext;
 
 import java.util.ArrayList;
@@ -24,11 +26,31 @@ public class HudManager {
         elements.add(new ArmorStatusElement());
     }
 
+    public List<HudElement> getElements() {
+        return elements;
+    }
+
+    public HudElement getByName(String name) {
+        return elements.stream()
+                .filter(e -> e.getName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
+    }
+
     public void render(DrawContext context, float tickDelta) {
+        int screenWidth = context.getScaledWindowWidth();
+        int screenHeight = context.getScaledWindowHeight();
+        boolean editor = HudEditorScreen.isActive();
+
         for (HudElement element : elements) {
-            if (element.isEnabled()) {
+            // 每帧根据锚点+偏移重算位置，窗口尺寸变化时自动保持正确布局
+            element.updatePosition(screenWidth, screenHeight);
+            // 编辑器中即使隐藏的元素也要显示
+            if (element.isEnabled() || editor) {
                 element.render(context, tickDelta);
             }
         }
+
+        NotificationManager.render(context);
     }
 }

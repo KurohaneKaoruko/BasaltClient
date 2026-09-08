@@ -8,11 +8,13 @@ import mc.basalt.client.event.EventBus;
 import mc.basalt.client.event.annotations.EventHandler;
 import mc.basalt.client.event.events.KeyEvent;
 import mc.basalt.client.system.modules.combat.AutoArmor;
+import mc.basalt.client.system.modules.combat.AutoClicker;
 import mc.basalt.client.system.modules.combat.AutoCrystal;
 import mc.basalt.client.system.modules.combat.AutoTotem;
 import mc.basalt.client.system.modules.combat.Criticals;
 import mc.basalt.client.system.modules.combat.Killaura;
 import mc.basalt.client.system.modules.combat.Velocity;
+import mc.basalt.client.system.modules.misc.AntiAFK;
 import mc.basalt.client.system.modules.misc.Timer;
 import mc.basalt.client.system.modules.movement.EntityControl;
 import mc.basalt.client.system.modules.movement.Flight;
@@ -23,6 +25,9 @@ import mc.basalt.client.system.modules.movement.Scaffold;
 import mc.basalt.client.system.modules.movement.Speed;
 import mc.basalt.client.system.modules.movement.Sprint;
 import mc.basalt.client.system.modules.movement.Step;
+import mc.basalt.client.system.modules.player.AutoEat;
+import mc.basalt.client.system.modules.player.AutoRespawn;
+import mc.basalt.client.system.modules.player.AutoTool;
 import mc.basalt.client.system.modules.player.Blink;
 import mc.basalt.client.system.modules.player.ChestStealer;
 import mc.basalt.client.system.modules.player.FastPlace;
@@ -32,6 +37,7 @@ import mc.basalt.client.system.modules.render.Fullbright;
 import mc.basalt.client.system.modules.render.Nametags;
 import mc.basalt.client.system.modules.render.Tracers;
 import mc.basalt.client.system.modules.render.XRay;
+import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
 
 public class Modules {
@@ -55,6 +61,7 @@ public class Modules {
         add(new Criticals());
         add(new AutoArmor());
         add(new AutoCrystal());
+        add(new AutoClicker());
 
         // Movement
         add(new Speed());
@@ -67,6 +74,7 @@ public class Modules {
 
         // Misc
         add(new Timer());
+        add(new AntiAFK());
 
         // Render
         add(new ESP());
@@ -79,6 +87,9 @@ public class Modules {
         add(new FastPlace());
         add(new ChestStealer());
         add(new Blink());
+        add(new AutoEat());
+        add(new AutoRespawn());
+        add(new AutoTool());
 
         EventBus.subscribe(this);
     }
@@ -106,6 +117,10 @@ public class Modules {
 
     @EventHandler
     public void onKey(KeyEvent event) {
+        // 有界面打开时（聊天、GUI）不触发模块按键，避免打字误触发
+        if (MinecraftClient.getInstance().currentScreen != null) {
+            return;
+        }
         if (event.getAction() == GLFW.GLFW_PRESS) {
             for (Module module : modules) {
                 if (module.getKey() == event.getKey()) {

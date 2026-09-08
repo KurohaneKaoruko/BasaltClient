@@ -5,70 +5,64 @@ import mc.basalt.client.system.commands.CommandManager;
 import mc.basalt.client.system.modules.Module;
 import mc.basalt.client.system.modules.Modules;
 import net.minecraft.client.util.InputUtil;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.Locale;
 
 public class BindCommand extends Command {
     public BindCommand() {
-        super("bind", "Bind a module to a key", ".bind <module> <key>");
+        super("bind", "为模块绑定按键", ".bind <模块名> <按键>");
     }
 
     @Override
     public void execute(String[] args) {
         if (args.length != 2) {
-            CommandManager.addChatMessage("Invalid syntax. Usage: " + getSyntax());
+            CommandManager.addChatMessage("用法错误: " + getSyntax());
             return;
         }
 
         String moduleName = args[0];
-        String keyName = args[1].toUpperCase(Locale.ROOT);
+        String keyName = args[1];
 
         Module module = Modules.get().getByName(moduleName);
         if (module == null) {
-            CommandManager.addChatMessage("Module '" + moduleName + "' not found.");
+            CommandManager.addChatMessage("未找到模块: " + moduleName);
             return;
         }
 
-        int key;
-        if (keyName.equalsIgnoreCase("NONE")) {
-            key = -1;
-        } else {
-            try {
-                // Try to parse as integer first (legacy support)
-                key = Integer.parseInt(keyName);
-            } catch (NumberFormatException e) {
-                // Parse key name using InputUtil
-                try {
-                    key = InputUtil.fromTranslationKey("key.keyboard." + keyName.toLowerCase()).getCode();
-                } catch (Exception ex) {
-                    // Fallback to simple GLFW lookup or error
-                    // Since InputUtil might be tricky with "key.keyboard.", let's try a simpler
-                    // approach if possible.
-                    // Actually, InputUtil.fromTranslationKey expects translation keys like
-                    // "key.keyboard.a".
-                    // A better way is InputUtil.getType(InputUtil.Type.KEYSYM, name).getCode() but
-                    // name must be valid.
-
-                    // Let's iterate GLFW keys or use a helper if we had one.
-                    // For now, let's assume the user types the GLFW key name like "R" or
-                    // "RIGHT_SHIFT".
-                    // But standard users type "R".
-
-                    // Simplified: Use InputUtil to get key from name.
-                    // "key.keyboard.r" -> R
-
-                    try {
-                        key = InputUtil.fromTranslationKey("key.keyboard." + keyName.toLowerCase()).getCode();
-                    } catch (IllegalArgumentException ie) {
-                        CommandManager.addChatMessage("Unknown key: " + keyName);
-                        return;
-                    }
-                }
-            }
+        int key = parseKeyCode(keyName);
+        if (key == Integer.MIN_VALUE) {
+            CommandManager.addChatMessage("未知按键: " + keyName);
+            return;
         }
 
         module.setKey(key);
-        CommandManager.addChatMessage("Bound " + module.getDisplayName() + " to " + keyName);
+        CommandManager.addChatMessage("已将 " + module.getDisplayName() + " 绑定到 " + module.getKeyName());
+    }
+
+    private int parseKeyCode(String input) {
+        String normalized = input.toLowerCase(Locale.ROOT);
+        if ("none".equals(normalized) || "无".equals(normalized)) {
+            return -1;
+        }
+
+        try {
+            return Integer.parseInt(normalized);
+        } catch (NumberFormatException ignored) {
+        }
+
+        String[] candidates = {
+                normalized,
+                "key.keyboard." + normalized,
+                "key.keyboard." + normalized.replace('_', '.')
+        };
+
+        for (String candidate : candidates) {
+            try {
+                return InputUtil.fromTranslationKey(candidate).getCode();
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+
+        return Integer.MIN_VALUE;
     }
 }

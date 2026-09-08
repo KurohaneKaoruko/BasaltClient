@@ -3,6 +3,7 @@ package mc.basalt.client.system.modules.render;
 import mc.basalt.client.BasaltClient;
 import mc.basalt.client.system.modules.Category;
 import mc.basalt.client.system.modules.Module;
+import mc.basalt.client.system.modules.Modules;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import java.util.HashSet;
@@ -35,28 +36,30 @@ public class XRay extends Module {
     }
 
     public XRay() {
-        super("XRay", "透视", "只显示矿物。", Category.Render);
+        super("XRay", "矿物透视", "隐藏普通方块，只显示矿物。", Category.Render);
     }
 
     @Override
     public void onEnable() {
         super.onEnable();
         BasaltClient.XRAY_ENABLED = true;
-        // Enable fullbright for visibility
-        if (mc.options != null) {
-            BasaltClient.FULLBRIGHT_ENABLED = true;
+        // 透视时附加夜视，保证矿洞可见（不覆盖 Fullbright 模块自身的状态）
+        BasaltClient.FULLBRIGHT_ENABLED = true;
+        if (mc.world != null && mc.worldRenderer != null) {
+            mc.worldRenderer.reload();
         }
-        mc.worldRenderer.reload();
     }
 
     @Override
     public void onDisable() {
         super.onDisable();
         BasaltClient.XRAY_ENABLED = false;
-        if (mc.options != null) {
-            BasaltClient.FULLBRIGHT_ENABLED = false;
+        // 仅当 Fullbright 模块未开启时才关闭夜视
+        Module fullbright = Modules.get().getByName("Fullbright");
+        BasaltClient.FULLBRIGHT_ENABLED = fullbright != null && fullbright.isEnabled();
+        if (mc.world != null && mc.worldRenderer != null) {
+            mc.worldRenderer.reload();
         }
-        mc.worldRenderer.reload();
     }
 
     public static boolean isOre(Block block) {

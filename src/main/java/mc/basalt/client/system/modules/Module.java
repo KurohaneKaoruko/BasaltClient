@@ -2,10 +2,13 @@ package mc.basalt.client.system.modules;
 
 import mc.basalt.client.event.EventBus;
 import mc.basalt.client.system.settings.Setting;
+import mc.basalt.client.ui.notifications.NotificationManager;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.util.InputUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public abstract class Module {
     protected final MinecraftClient mc = MinecraftClient.getInstance();
@@ -42,15 +45,23 @@ public abstract class Module {
     }
 
     public void enable() {
+        if (enabled) {
+            return;
+        }
         enabled = true;
         EventBus.subscribe(this);
         onEnable();
+        NotificationManager.success(getDisplayName(), "已开启");
     }
 
     public void disable() {
+        if (!enabled) {
+            return;
+        }
         enabled = false;
         EventBus.unsubscribe(this);
         onDisable();
+        NotificationManager.show(getDisplayName(), "已关闭", NotificationManager.Type.INFO, 1500);
     }
 
     public void onEnable() {
@@ -91,6 +102,26 @@ public abstract class Module {
     }
 
     public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+        if (enabled) {
+            enable();
+            return;
+        }
+        disable();
+    }
+
+    public String getKeyName() {
+        if (key < 0) {
+            return "NONE";
+        }
+
+        try {
+            String localized = InputUtil.fromKeyCode(key, -1).getLocalizedText().getString();
+            if (localized == null || localized.isBlank()) {
+                return "KEY_" + key;
+            }
+            return localized.toUpperCase(Locale.ROOT);
+        } catch (Exception ignored) {
+            return "KEY_" + key;
+        }
     }
 }

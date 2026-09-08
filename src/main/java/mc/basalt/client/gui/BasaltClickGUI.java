@@ -7,118 +7,257 @@ import mc.basalt.client.system.modules.Module;
 import mc.basalt.client.system.modules.Modules;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Style;
+import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.lwjgl.glfw.GLFW;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class BasaltClickGUI extends Screen {
     public static final BasaltClickGUI INSTANCE = new BasaltClickGUI();
-    private static final Identifier LOGO = Identifier.of(BasaltClient.MOD_ID, "logo.png");
-    private static final int LOGO_TEXTURE_WIDTH = 3165;
-    private static final int LOGO_TEXTURE_HEIGHT = 1340;
 
-    // Basalt Tech Theme Colors
-    // Glass/Obsidian Background (Dark with transparency)
+    private static final Identifier LOGO = Identifier.of(BasaltClient.MOD_ID, "logo.png");
+    private static final int LOGO_TEXTURE_WIDTH = 900;
+    private static final int LOGO_TEXTURE_HEIGHT = 381;
+    /** logo 纹理过滤只需设置一次（双线性 + mipmap，消除缩小采样锯齿）。 */
+    private static boolean logoFilterApplied;
+
     private static final int HEADER_BG = new Color(20, 20, 20, 230).getRGB();
     private static final int MODULE_BG_DISABLED = new Color(30, 30, 30, 180).getRGB();
-
-    // Tech Accent (Deep Lava/Basalt Glow) - You can change to Cyan/White if
-    // preferred
     private static final int MODULE_BG_ENABLED_START = new Color(40, 40, 40, 230).getRGB();
     private static final int MODULE_BG_ENABLED_END = new Color(20, 20, 20, 230).getRGB();
-
-    // Accent Line (White/Light Gray for clean tech look)
     private static final int ACCENT_COLOR = new Color(220, 220, 220, 255).getRGB();
-
     private static final int HOVER_OVERLAY = new Color(255, 255, 255, 20).getRGB();
     private static final int BORDER_COLOR = new Color(60, 60, 60, 255).getRGB();
 
-    // Removed Custom Font Identifier to fix rendering issues
-    // private static final Identifier CUSTOM_FONT =
-    // Identifier.of(BasaltClient.MOD_ID, "source_han_sans");
+    private static final int PANEL_X = 16;
+    private static final int PANEL_Y = 30;
+    private static final int CATEGORY_WIDTH = 132;
+    private static final int CATEGORY_GAP = 8;
+    private static final int CATEGORY_ROW_GAP = 10;
+    private static final int HEADER_HEIGHT = 22;
+    private static final int MODULE_HEIGHT = 18;
+    private static final int MODULE_GAP = 1;
+
+    private final Map<Category, Boolean> categoryExpanded = new EnumMap<>(Category.class);
+    private String searchQuery = "";
 
     public BasaltClickGUI() {
         super(Text.of("ClickGUI"));
+        for (Category category : Category.values()) {
+            categoryExpanded.put(category, true);
+        }
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        // Render background
         this.renderBackground(context, mouseX, mouseY, delta);
 
-        int startX = 20;
-        int startY = 20;
-        int width = 110;
-        int padding = 10;
+        renderSearchBar(context);
 
         String tooltipText = null;
+        for (CategoryLayout layout : buildLayouts()) {
+            Category category = layout.category();
+            boolean expanded = categoryExpanded.getOrDefault(category, true);
 
-        for (Category category : Category.values()) {
-            // Render Category Header
-            int headerHeight = 22;
+            context.fill(layout.x(), layout.y(), layout.x() + CATEGORY_WIDTH, layout.y() + HEADER_HEIGHT, HEADER_BG);
+            context.drawBorder(layout.x(), layout.y(), CATEGORY_WIDTH, HEADER_HEIGHT, BORDER_COLOR);
 
-            // Header Background (Glassy Dark)
-            context.fill(startX, startY, startX + width, startY + headerHeight, HEADER_BG);
-            // Header Border
-            context.drawBorder(startX, startY, width, headerHeight, BORDER_COLOR);
-
-            // Centered Header Text
-            Text headerText = Text.literal(category.name); // Removed custom font style
+            String headerLabel = (expanded ? "- " : "+ ") + category.name;
+            Text headerText = Text.literal(headerLabel);
             int textWidth = textRenderer.getWidth(headerText);
-            context.drawTextWithShadow(textRenderer, headerText, startX + (width - textWidth) / 2, startY + 7,
-                    ACCENT_COLOR);
+            context.drawTextWithShadow(textRenderer, headerText, layout.x() + (CATEGORY_WIDTH - textWidth) / 2, layout.y() + 7, ACCENT_COLOR);
 
-            // Render Modules
-            int moduleY = startY + headerHeight + 1; // +1 spacing
-            List<Module> modules = Modules.get().getByCategory(category);
+            if (!expanded) {
+                continue;
+            }
 
-            for (Module module : modules) {
-                boolean isHovered = mouseX >= startX && mouseX <= startX + width && mouseY >= moduleY
-                        && mouseY <= moduleY + 18;
+            int moduleY = layout.y() + HEADER_HEIGHT + 1;
+            for (Module module : layout.modules()) {
+                boolean isHovered = mouseX >= layout.x() && mouseX <= layout.x() + CATEGORY_WIDTH && mouseY >= moduleY && mouseY <= moduleY + MODULE_HEIGHT;
 
-                // Background
                 if (module.isEnabled()) {
-                    // Gradient for enabled modules
-                    context.fillGradient(startX, moduleY, startX + width, moduleY + 18, MODULE_BG_ENABLED_START,
-                            MODULE_BG_ENABLED_END);
-                    // Left Accent Bar for enabled modules
-                    context.fill(startX, moduleY, startX + 2, moduleY + 18, ACCENT_COLOR);
+                    context.fillGradient(layout.x(), moduleY, layout.x() + CATEGORY_WIDTH, moduleY + MODULE_HEIGHT, MODULE_BG_ENABLED_START, MODULE_BG_ENABLED_END);
+                    context.fill(layout.x(), moduleY, layout.x() + 2, moduleY + MODULE_HEIGHT, ACCENT_COLOR);
                 } else {
-                    context.fill(startX, moduleY, startX + width, moduleY + 18, MODULE_BG_DISABLED);
+                    context.fill(layout.x(), moduleY, layout.x() + CATEGORY_WIDTH, moduleY + MODULE_HEIGHT, MODULE_BG_DISABLED);
                 }
 
-                // Hover Effect
                 if (isHovered) {
-                    context.fill(startX, moduleY, startX + width, moduleY + 18, HOVER_OVERLAY);
+                    context.fill(layout.x(), moduleY, layout.x() + CATEGORY_WIDTH, moduleY + MODULE_HEIGHT, HOVER_OVERLAY);
                     tooltipText = module.getDescription();
                 }
 
-                // Module Border (Subtle 1px outline for tech feel)
-                context.drawBorder(startX, moduleY, width, 18, BORDER_COLOR);
+                context.drawBorder(layout.x(), moduleY, CATEGORY_WIDTH, MODULE_HEIGHT, BORDER_COLOR);
 
-                // Module Name
-                Text moduleText = Text.literal(module.getDisplayName()); // Removed custom font style
-                int textColor = module.isEnabled() ? 0xFFFFFF : 0xAAAAAA;
-                context.drawTextWithShadow(textRenderer, moduleText, startX + 6, moduleY + 5, textColor);
+                Text moduleText = Text.literal(module.getDisplayName());
+                int moduleTextColor = module.isEnabled() ? 0xFFFFFF : 0xAAAAAA;
+                context.drawTextWithShadow(textRenderer, moduleText, layout.x() + 6, moduleY + 5, moduleTextColor);
 
-                moduleY += 19; // 18 height + 1 spacing
+                String bindName = module.getKeyName();
+                Text bindText = Text.literal(bindName.equals("NONE") ? "-" : bindName);
+                int bindWidth = textRenderer.getWidth(bindText);
+                context.drawTextWithShadow(textRenderer, bindText, layout.x() + CATEGORY_WIDTH - bindWidth - 4, moduleY + 5, 0x909090);
+
+                moduleY += MODULE_HEIGHT + MODULE_GAP;
             }
-
-            startX += width + padding;
         }
 
-        // Render tooltip last so it's on top
         if (tooltipText != null) {
             context.drawTooltip(textRenderer, Text.literal(tooltipText), mouseX, mouseY);
         }
 
+        context.drawTextWithShadow(
+                textRenderer,
+                Text.literal("左键: 开关  右键: 设置  中键: 绑定  标题: 折叠  直接输入: 搜索"),
+                10,
+                this.height - 14,
+                0xB0B0B0
+        );
+
+        drawLogo(context);
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        for (CategoryLayout layout : buildLayouts()) {
+            int headerX1 = layout.x();
+            int headerY1 = layout.y();
+            int headerX2 = layout.x() + CATEGORY_WIDTH;
+            int headerY2 = layout.y() + HEADER_HEIGHT;
+
+            if (mouseX >= headerX1 && mouseX <= headerX2 && mouseY >= headerY1 && mouseY <= headerY2 && button == 0) {
+                categoryExpanded.put(layout.category(), !categoryExpanded.getOrDefault(layout.category(), true));
+                return true;
+            }
+
+            if (!categoryExpanded.getOrDefault(layout.category(), true)) {
+                continue;
+            }
+
+            int moduleY = layout.y() + HEADER_HEIGHT + 1;
+            for (Module module : layout.modules()) {
+                if (mouseX >= layout.x() && mouseX <= layout.x() + CATEGORY_WIDTH && mouseY >= moduleY && mouseY <= moduleY + MODULE_HEIGHT) {
+                    if (button == 0) {
+                        module.toggle();
+                        return true;
+                    }
+
+                    if (button == 1) {
+                        if (client != null) {
+                            client.setScreen(new ModuleSettingsScreen(module, this));
+                        }
+                        return true;
+                    }
+
+                    if (button == 2) {
+                        // 中键：直接进入按键绑定模式
+                        if (client != null) {
+                            client.setScreen(new ModuleSettingsScreen(module, this, true));
+                        }
+                        return true;
+                    }
+                }
+                moduleY += MODULE_HEIGHT + MODULE_GAP;
+            }
+        }
+
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_BACKSPACE && !searchQuery.isEmpty()) {
+            searchQuery = searchQuery.substring(0, searchQuery.length() - 1);
+            return true;
+        }
+
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE && !searchQuery.isEmpty()) {
+            searchQuery = "";
+            return true;
+        }
+
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean charTyped(char chr, int modifiers) {
+        if (!Character.isISOControl(chr)) {
+            searchQuery += chr;
+            return true;
+        }
+
+        return super.charTyped(chr, modifiers);
+    }
+
+    private void renderSearchBar(DrawContext context) {
+        int searchX = PANEL_X;
+        int searchY = 8;
+        int searchWidth = Math.min(260, this.width - PANEL_X * 2);
+        int searchHeight = 18;
+
+        context.fill(searchX, searchY, searchX + searchWidth, searchY + searchHeight, HEADER_BG);
+        context.drawBorder(searchX, searchY, searchWidth, searchHeight, BORDER_COLOR);
+
+        String query = searchQuery.isEmpty() ? "(所有模块)" : searchQuery;
+        context.drawTextWithShadow(textRenderer, Text.literal("搜索: " + query), searchX + 6, searchY + 5, ACCENT_COLOR);
+    }
+
+    private List<CategoryLayout> buildLayouts() {
+        List<CategoryLayout> layouts = new ArrayList<>();
+
+        int x = PANEL_X;
+        int y = PANEL_Y;
+        int rowHeight = 0;
+
+        int maxX = this.width - PANEL_X;
+
+        for (Category category : Category.values()) {
+            List<Module> modules = getFilteredModules(category);
+            boolean expanded = categoryExpanded.getOrDefault(category, true);
+            int panelHeight = HEADER_HEIGHT + 1 + (expanded ? modules.size() * (MODULE_HEIGHT + MODULE_GAP) : 0);
+
+            if (x + CATEGORY_WIDTH > maxX) {
+                x = PANEL_X;
+                y += rowHeight + CATEGORY_ROW_GAP;
+                rowHeight = 0;
+            }
+
+            layouts.add(new CategoryLayout(category, x, y, modules));
+
+            rowHeight = Math.max(rowHeight, panelHeight);
+            x += CATEGORY_WIDTH + CATEGORY_GAP;
+        }
+
+        return layouts;
+    }
+
+    private List<Module> getFilteredModules(Category category) {
+        List<Module> modules = Modules.get().getByCategory(category);
+        if (searchQuery.isBlank()) {
+            return modules;
+        }
+
+        String needle = searchQuery.toLowerCase(Locale.ROOT);
+        return modules.stream()
+                .filter(module -> module.getName().toLowerCase(Locale.ROOT).contains(needle)
+                        || module.getDisplayName().toLowerCase(Locale.ROOT).contains(needle)
+                        || module.getDescription().toLowerCase(Locale.ROOT).contains(needle))
+                .toList();
+    }
+
+    private void drawLogo(DrawContext context) {
         int maxLogoSize = 150;
         int margin = 8;
         int logoWidth;
         int logoHeight;
+
         if (LOGO_TEXTURE_WIDTH >= LOGO_TEXTURE_HEIGHT) {
             logoWidth = maxLogoSize;
             logoHeight = Math.max(1, (int) Math.round((double) maxLogoSize * LOGO_TEXTURE_HEIGHT / LOGO_TEXTURE_WIDTH));
@@ -131,6 +270,18 @@ public class BasaltClickGUI extends Screen {
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
+        // 为 logo 纹理启用双线性 + mipmap 过滤（仅需一次），避免大图缩小到 150px 时的锯齿边缘
+        if (client != null && !logoFilterApplied) {
+            try {
+                AbstractTexture texture = client.getTextureManager().getTexture(LOGO);
+                RenderSystem.bindTexture(texture.getGlId());
+                texture.setFilter(true, true);
+                logoFilterApplied = true;
+            } catch (Exception ignored) {
+                // 纹理尚未就绪时下一帧重试
+            }
+        }
+
         context.drawTexture(
                 LOGO,
                 this.width - logoWidth - margin,
@@ -142,45 +293,17 @@ public class BasaltClickGUI extends Screen {
                 LOGO_TEXTURE_WIDTH,
                 LOGO_TEXTURE_HEIGHT,
                 LOGO_TEXTURE_WIDTH,
-                LOGO_TEXTURE_HEIGHT);
+                LOGO_TEXTURE_HEIGHT
+        );
 
         RenderSystem.disableBlend();
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        int startX = 20;
-        int startY = 20;
-        int width = 110;
-        int padding = 10;
-
-        for (Category category : Category.values()) {
-            int headerHeight = 22;
-            int moduleY = startY + headerHeight + 1;
-            List<Module> modules = Modules.get().getByCategory(category);
-
-            for (Module module : modules) {
-                if (mouseX >= startX && mouseX <= startX + width && mouseY >= moduleY && mouseY <= moduleY + 18) {
-                    if (button == 0) { // Left click to toggle
-                        module.toggle();
-                        return true;
-                    } else if (button == 1) { // Right click for settings
-                        if (client != null) {
-                            client.setScreen(new ModuleSettingsScreen(module, this));
-                        }
-                        return true;
-                    }
-                }
-                moduleY += 19;
-            }
-            startX += width + padding;
-        }
-
-        return super.mouseClicked(mouseX, mouseY, button);
-    }
-
-    @Override
     public boolean shouldPause() {
         return false;
+    }
+
+    private record CategoryLayout(Category category, int x, int y, List<Module> modules) {
     }
 }

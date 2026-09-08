@@ -1,8 +1,9 @@
 package mc.basalt.client.system.commands;
 
-import mc.basalt.client.BasaltClient;
 import mc.basalt.client.system.commands.impl.BindCommand;
 import mc.basalt.client.system.commands.impl.HelpCommand;
+import mc.basalt.client.system.commands.impl.HudCommand;
+import mc.basalt.client.system.commands.impl.PanicCommand;
 import mc.basalt.client.system.commands.impl.ToggleCommand;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.minecraft.client.MinecraftClient;
@@ -23,15 +24,16 @@ public class CommandManager {
     private void init() {
         add(new BindCommand());
         add(new ToggleCommand());
+        add(new PanicCommand());
         add(new HelpCommand());
+        add(new HudCommand());
 
-        // Register event
         ClientSendMessageEvents.ALLOW_CHAT.register(message -> {
             if (message.startsWith(PREFIX)) {
                 run(message);
-                return false; // Cancel sending to server
+                return false;
             }
-            return true; // Allow sending
+            return true;
         });
     }
 
@@ -45,8 +47,9 @@ public class CommandManager {
 
     public void run(String message) {
         String[] args = message.substring(PREFIX.length()).split(" ");
-        if (args.length == 0)
+        if (args.length == 0) {
             return;
+        }
 
         String commandName = args[0];
         for (Command command : commands) {
@@ -56,19 +59,24 @@ public class CommandManager {
                 try {
                     command.execute(commandArgs);
                 } catch (Exception e) {
-                    addChatMessage("Error executing command: " + e.getMessage());
+                    addChatMessage("命令执行出错: " + e.getMessage());
                     e.printStackTrace();
                 }
                 return;
             }
         }
 
-        addChatMessage("Unknown command: " + commandName + ". Type .help for a list of commands.");
+        addChatMessage("未知命令: " + commandName + "，输入 .help 查看命令列表。");
     }
 
     public static void addChatMessage(String message) {
-        if (MinecraftClient.getInstance().player != null) {
-            MinecraftClient.getInstance().player.sendMessage(Text.literal("§7[§bBasalt§7] §r" + message), false);
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player != null) {
+            client.player.sendMessage(
+                    Text.literal("[Basalt] ").formatted(Formatting.GRAY)
+                            .append(Text.literal(message).formatted(Formatting.WHITE)),
+                    false
+            );
         }
     }
 }

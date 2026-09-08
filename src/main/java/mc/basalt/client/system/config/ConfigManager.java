@@ -11,6 +11,8 @@ import mc.basalt.client.system.settings.BooleanSetting;
 import mc.basalt.client.system.settings.DoubleSetting;
 import mc.basalt.client.system.settings.ModeSetting;
 import mc.basalt.client.system.settings.Setting;
+import mc.basalt.client.ui.hud.HudElement;
+import mc.basalt.client.ui.hud.HudManager;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.File;
@@ -49,6 +51,18 @@ public class ConfigManager {
 
         json.add("modules", modulesJson);
 
+        // HUD 布局（锚点 + 偏移，分辨率无关）
+        JsonObject hudJson = new JsonObject();
+        for (HudElement element : HudManager.get().getElements()) {
+            JsonObject elementJson = new JsonObject();
+            elementJson.addProperty("anchor", element.getAnchor().name());
+            elementJson.addProperty("offsetX", element.getOffsetX());
+            elementJson.addProperty("offsetY", element.getOffsetY());
+            elementJson.addProperty("enabled", element.isEnabled());
+            hudJson.add(element.getName(), elementJson);
+        }
+        json.add("hud", hudJson);
+
         try {
             if (!CONFIG_FILE.getParentFile().exists()) {
                 CONFIG_FILE.getParentFile().mkdirs();
@@ -73,12 +87,8 @@ public class ConfigManager {
                     if (modulesJson.has(module.getName())) {
                         JsonObject moduleJson = modulesJson.getAsJsonObject(module.getName());
                         
-                        // Load Enabled State
-                        if (moduleJson.has("enabled") && moduleJson.get("enabled").getAsBoolean()) {
-                            module.setEnabled(true);
-                        } else {
-                            module.setEnabled(false);
-                        }
+                        boolean shouldEnable = moduleJson.has("enabled") && moduleJson.get("enabled").getAsBoolean();
+                        module.setEnabled(shouldEnable);
                         
                         // Load Keybind
                         if (moduleJson.has("key")) {
@@ -91,16 +101,43 @@ public class ConfigManager {
                             for (Setting<?> setting : module.getSettings()) {
                                 if (settingsJson.has(setting.getName())) {
                                     JsonElement value = settingsJson.get(setting.getName());
-                                    if (setting instanceof BooleanSetting) {
-                                        ((BooleanSetting) setting).set(value.getAsBoolean());
-                                    } else if (setting instanceof DoubleSetting) {
-                                        ((DoubleSetting) setting).set(value.getAsDouble());
-                                    } else if (setting instanceof ModeSetting) {
-                                        ((ModeSetting) setting).set(value.getAsString());
+                                    try {
+                                        if (setting instanceof BooleanSetting) {
+                                            ((BooleanSetting) setting).set(value.getAsBoolean());
+                                        } else if (setting instanceof DoubleSetting) {
+                                            ((DoubleSetting) setting).set(value.getAsDouble());
+                                        } else if (setting instanceof ModeSetting) {
+                                            ((ModeSetting) setting).set(value.getAsString());
+                                        }
+                                    } catch (Exception ignored) {
                                     }
                                 }
                             }
                         }
+                    }
+                }
+            }
+
+            // HUD 布局（锚点 + 偏移）
+            if (json.has("hud")) {
+                JsonObject hudJson = json.getAsJsonObject("hud");
+                for (HudElement element : HudManager.get().getElements()) {
+                    if (!hudJson.has(element.getName())) {
+                        continue;
+                    }
+                    try {
+                        JsonObject elementJson = hudJson.getAsJsonObject(element.getName());
+                        if (elementJson.has("anchor")) {
+                            element.setAnchor(HudElement.Anchor.valueOf(elementJson.get("anchor").getAsString()));
+                        }
+                        if (elementJson.has("offsetX") && elementJson.has("offsetY")) {
+                            element.setOffsetX(elementJson.get("offsetX").getAsInt());
+                            element.setOffsetY(elementJson.get("offsetY").getAsInt());
+                        }
+                        if (elementJson.has("enabled")) {
+                            element.setEnabled(elementJson.get("enabled").getAsBoolean());
+                        }
+                    } catch (Exception ignored) {
                     }
                 }
             }

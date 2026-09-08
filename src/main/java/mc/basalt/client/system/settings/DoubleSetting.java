@@ -30,4 +30,14 @@ public class DoubleSetting extends Setting<Double> {
     public double getIncrement() {
         return increment;
     }
+
+    @Override
+    public void set(Double newValue) {
+        double clamped = Math.max(min, Math.min(max, newValue));
+        if (increment > 0) {
+            clamped = Math.round(clamped / increment) * increment;
+            clamped = Math.max(min, Math.min(max, clamped));
+        }
+        super.set(clamped);
+    }
 }

@@ -1,6 +1,7 @@
 package mc.basalt.client;
 
 import mc.basalt.client.gui.BasaltClickGUI;
+import mc.basalt.client.gui.HudEditorScreen;
 import mc.basalt.client.system.config.ConfigManager;
 import mc.basalt.client.system.modules.Modules;
 import mc.basalt.client.system.commands.CommandManager;
@@ -46,6 +47,7 @@ public class BasaltClient implements ClientModInitializer {
     public static double FREECAM_X, FREECAM_Y, FREECAM_Z;
     public static float FREECAM_YAW, FREECAM_PITCH;
     public static KeyBinding CLICK_GUI_KEY;
+    public static KeyBinding HUD_EDITOR_KEY;
     private CommandManager commandManager;
 
     @Override
@@ -77,6 +79,13 @@ public class BasaltClient implements ClientModInitializer {
                 GLFW.GLFW_KEY_RIGHT_SHIFT,
                 "category.basalt.client"));
 
+        // Register HUD Editor Keybind (H)
+        HUD_EDITOR_KEY = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.basalt.hudeditor",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_H,
+                "category.basalt.client"));
+
         // Register Client Tick Event
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (CLICK_GUI_KEY.wasPressed()) {
@@ -84,6 +93,12 @@ public class BasaltClient implements ClientModInitializer {
                     client.setScreen(BasaltClickGUI.INSTANCE);
                 } else if (client.currentScreen instanceof BasaltClickGUI) {
                     client.setScreen(null);
+                }
+            }
+
+            while (HUD_EDITOR_KEY.wasPressed()) {
+                if (client.currentScreen == null) {
+                    client.setScreen(new HudEditorScreen());
                 }
             }
         });

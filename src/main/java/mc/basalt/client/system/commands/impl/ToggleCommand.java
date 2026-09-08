@@ -4,17 +4,16 @@ import mc.basalt.client.system.commands.Command;
 import mc.basalt.client.system.commands.CommandManager;
 import mc.basalt.client.system.modules.Module;
 import mc.basalt.client.system.modules.Modules;
-import net.minecraft.util.Formatting;
 
 public class ToggleCommand extends Command {
     public ToggleCommand() {
-        super("toggle", "Toggles a module", ".toggle <module>");
+        super("toggle", "开关一个模块", ".toggle <模块名>");
     }
 
     @Override
     public void execute(String[] args) {
         if (args.length != 1) {
-            CommandManager.addChatMessage("Invalid syntax. Usage: " + getSyntax());
+            CommandManager.addChatMessage("用法错误: " + getSyntax());
             return;
         }
 
@@ -22,11 +21,11 @@ public class ToggleCommand extends Command {
         Module module = Modules.get().getByName(moduleName);
 
         if (module == null) {
-            CommandManager.addChatMessage("Module '" + moduleName + "' not found.");
+            CommandManager.addChatMessage("未找到模块: " + moduleName);
             return;
         }
 
         module.toggle();
-        CommandManager.addChatMessage("Toggled " + module.getDisplayName() + (module.isEnabled() ? " §aON" : " §cOFF"));
+        CommandManager.addChatMessage(module.getDisplayName() + (module.isEnabled() ? " 已开启" : " 已关闭"));
     }
 }

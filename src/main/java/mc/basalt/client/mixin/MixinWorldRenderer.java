@@ -18,14 +18,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinWorldRenderer {
     @Inject(method = "render", at = @At("RETURN"))
     private void onRender(RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f positionMatrix, Matrix4f projectionMatrix, CallbackInfo ci) {
-        // We create a new MatrixStack for rendering in the world
+        // positionMatrix 即本帧的世界模型视图矩阵（含相机旋转），
+        // 与全局投影矩阵配合即可在模块中绘制世界空间几何体。
         MatrixStack matrixStack = new MatrixStack();
-        // Note: In a real implementation, we might need to apply the camera rotation/position to the matrix stack
-        // or pass the matrices directly. For simplicity, we pass an empty stack and modules handle projection if needed,
-        // or we rely on the fact that we are in the render cycle.
-        // Actually, Render3D usually needs the matrices.
-        // But for standard "render in world" events, we often just pass the partial ticks.
-        
-        EventBus.post(new Render3DEvent(matrixStack, tickCounter.getTickDelta(true)));
+        matrixStack.multiplyPositionMatrix(positionMatrix);
+        EventBus.post(new Render3DEvent(matrixStack, tickCounter.getTickDelta(true), camera));
     }
 }

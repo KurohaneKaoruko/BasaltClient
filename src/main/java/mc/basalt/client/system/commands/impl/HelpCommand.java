@@ -6,15 +6,14 @@ import mc.basalt.client.system.commands.CommandManager;
 
 public class HelpCommand extends Command {
     public HelpCommand() {
-        super("help", "Lists all commands", ".help");
+        super("help", "显示所有命令", ".help");
     }
 
     @Override
     public void execute(String[] args) {
-        CommandManager.addChatMessage("§bBasalt Client " + BasaltClient.VERSION + " Commands:");
+        CommandManager.addChatMessage("玄武岩客户端 " + BasaltClient.VERSION + " 命令列表:");
         for (Command command : BasaltClient.INSTANCE.getCommandManager().getCommands()) {
-            CommandManager.addChatMessage("§7" + command.getName() + " §8- §f" + command.getDescription() + " §7("
-                    + command.getSyntax() + ")");
+            CommandManager.addChatMessage("." + command.getName() + " - " + command.getDescription() + " (" + command.getSyntax() + ")");
         }
     }
 }

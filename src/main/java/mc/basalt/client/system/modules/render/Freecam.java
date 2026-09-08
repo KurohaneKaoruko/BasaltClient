@@ -6,14 +6,17 @@ import mc.basalt.client.event.events.TickEvent;
 import mc.basalt.client.system.modules.Category;
 import mc.basalt.client.system.modules.Module;
 import mc.basalt.client.system.settings.DoubleSetting;
+import net.minecraft.client.input.Input;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 
 public class Freecam extends Module {
     private final DoubleSetting speed = new DoubleSetting("速度", 1.0, 0.1, 5.0, 0.1);
 
+    /** 保存被替换的玩家输入，关闭时恢复。 */
+    private Input originalInput;
+
     public Freecam() {
-        super("Freecam", "自由视角", "允许相机脱离身体自由移动。", Category.Render);
+        super("Freecam", "自由视角", "相机脱离身体自由移动，身体停在原地。", Category.Render);
         addSetting(speed);
     }
 
@@ -21,36 +24,52 @@ public class Freecam extends Module {
     public void onEnable() {
         super.onEnable();
         if (mc.player != null) {
-            BasaltClient.FREECAM_X = mc.player.getX();
-            BasaltClient.FREECAM_Y = mc.player.getEyeY(); // Use eye height for camera start
-            BasaltClient.FREECAM_Z = mc.player.getZ();
-            BasaltClient.FREECAM_YAW = mc.player.getYaw();
-            BasaltClient.FREECAM_PITCH = mc.player.getPitch();
-            BasaltClient.FREECAM_ENABLED = true;
+            initializeCamera();
         }
+    }
+
+    private void initializeCamera() {
+        BasaltClient.FREECAM_X = mc.player.getX();
+        BasaltClient.FREECAM_Y = mc.player.getEyeY();
+        BasaltClient.FREECAM_Z = mc.player.getZ();
+        BasaltClient.FREECAM_YAW = mc.player.getYaw();
+        BasaltClient.FREECAM_PITCH = mc.player.getPitch();
+        BasaltClient.FREECAM_ENABLED = true;
     }
 
     @Override
     public void onDisable() {
         super.onDisable();
         BasaltClient.FREECAM_ENABLED = false;
-        // Optional: teleport player to camera? usually not for freecam.
+        if (mc.player != null && originalInput != null) {
+            mc.player.input = originalInput;
+        }
+        originalInput = null;
     }
 
     @EventHandler
     public void onTick(TickEvent.Pre event) {
-        if (!BasaltClient.FREECAM_ENABLED || mc.player == null)
+        if (mc.player == null || mc.world == null) {
             return;
+        }
+        if (!BasaltClient.FREECAM_ENABLED) {
+            // 延迟初始化（例如从配置加载时世界尚未就绪）
+            initializeCamera();
+        }
 
-        // Freeze player input (handled by not passing inputs to server?
-        // Or overriding input. For now let's just update camera pos locally)
-        // To prevent player movement, we could cancel movement packets or override
-        // input.
-        // A simple way is setting player velocity to 0 or resetting position
-        // (rubberband).
-        // Better: MixinClientPlayerEntity to ignore input when Freecam is on.
+        // 冻结玩家输入，让身体停在原地
+        if (mc.player.input != null && originalInput == null) {
+            originalInput = mc.player.input;
+        }
+        if (originalInput != null) {
+            mc.player.input = new Input();
+        }
+        mc.player.setVelocity(0, 0, 0);
 
-        // Update Freecam position based on keyboard input
+        // 相机旋转跟随鼠标（鼠标仍作用于玩家视角）
+        BasaltClient.FREECAM_YAW = mc.player.getYaw();
+        BasaltClient.FREECAM_PITCH = mc.player.getPitch();
+
         float forward = 0;
         float strafe = 0;
         float vertical = 0;
@@ -68,56 +87,20 @@ public class Freecam extends Module {
         if (mc.options.sneakKey.isPressed())
             vertical--;
 
-        float yaw = BasaltClient.FREECAM_YAW;
-        float pitch = BasaltClient.FREECAM_PITCH;
-
-        // Update rotation from player (since we don't block mouse input yet, player
-        // rotates)
-        // Ideally we detach rotation too.
-        // For now, let's sync camera rotation with player rotation for control,
-        // but keep position separate.
-        BasaltClient.FREECAM_YAW = mc.player.getYaw();
-        BasaltClient.FREECAM_PITCH = mc.player.getPitch();
+        if (forward == 0 && strafe == 0 && vertical == 0) {
+            return;
+        }
 
         double s = speed.get();
+        float yawRad = BasaltClient.FREECAM_YAW * ((float) Math.PI / 180F);
+        float sin = MathHelper.sin(yawRad);
+        float cos = MathHelper.cos(yawRad);
 
-        // Calculate movement vector
-        double sin = Math.sin(Math.toRadians(yaw + 90));
-        double cos = Math.cos(Math.toRadians(yaw + 90)); // Forward is +90 deg relative to sin/cos standard?
-        // Standard Minecraft yaw: 0=South(+Z), 90=West(-X), 180=North(-Z), 270=East(+X)
-        // Math: 0=East(+X), 90=North(+Y)...
+        double mx = (strafe * cos - forward * sin) * s;
+        double mz = (forward * cos + strafe * sin) * s;
 
-        // Let's use Vec3d.fromPolar
-        Vec3d forwardVec = Vec3d.fromPolar(0, yaw).multiply(forward * s);
-        Vec3d strafeVec = Vec3d.fromPolar(0, yaw - 90).multiply(strafe * s); // -90 for left strafe
-        // Actually fromPolar(pitch, yaw)
-
-        double mx = 0;
-        double mz = 0;
-
-        // Manual calc to ensure horizontal only
-        float f = yaw * ((float) Math.PI / 180F);
-        float h = MathHelper.cos(f);
-        float i = MathHelper.sin(f);
-
-        // Forward
-        mx += (double) (i * -forward);
-        mz += (double) (h * forward);
-
-        // Strafe
-        float f2 = (yaw - 90) * ((float) Math.PI / 180F);
-        float h2 = MathHelper.cos(f2);
-        float i2 = MathHelper.sin(f2);
-
-        mx += (double) (i2 * -strafe);
-        mz += (double) (h2 * strafe);
-
-        BasaltClient.FREECAM_X += mx * s;
-        BasaltClient.FREECAM_Z += mz * s;
+        BasaltClient.FREECAM_X += mx;
+        BasaltClient.FREECAM_Z += mz;
         BasaltClient.FREECAM_Y += vertical * s;
-
-        // Prevent player from moving by canceling input?
-        // Simple hack: set player velocity to 0
-        mc.player.setVelocity(0, 0, 0);
     }
 }

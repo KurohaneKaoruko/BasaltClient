@@ -21,6 +21,7 @@
 			"mc.basalt.client.BasaltClient"
 		]
 	},
+	"accessWidener": "basalt-client.accesswidener",
 	"mixins": [
 		"basalt-client.mixins.json"
 	],

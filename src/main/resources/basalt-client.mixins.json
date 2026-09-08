@@ -3,13 +3,20 @@
 	"package": "mc.basalt.client.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-      "BasaltMixin",
-      "MixinMinecraftClient",
-      "MixinWorldRenderer",
-      "MixinClientConnection",
-      "MixinKeyboard",
-      "MixinInGameHud",
-      "IMinecraftClientAccessor"
+		"BasaltMixin",
+		"MixinClientConnection",
+		"MixinPlayerEntity",
+		"MixinBlock"
+	],
+	"client": [
+		"MixinMinecraftClient",
+		"MixinWorldRenderer",
+		"MixinKeyboard",
+		"MixinInGameHud",
+		"MixinCamera",
+		"MixinRenderTickCounter",
+		"MixinLightmapTextureManager",
+		"IMinecraftClientAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1

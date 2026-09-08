@@ -5,32 +5,121 @@ import mc.basalt.client.event.events.Render3DEvent;
 import mc.basalt.client.system.modules.Category;
 import mc.basalt.client.system.modules.Module;
 import mc.basalt.client.system.settings.BooleanSetting;
+import mc.basalt.client.system.settings.DoubleSetting;
+import mc.basalt.client.utils.RenderUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.mob.Monster;
+import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 
 public class ESP extends Module {
-    private final BooleanSetting box = new BooleanSetting("方框", true);
-    private final BooleanSetting tracers = new BooleanSetting("连线", false);
+    private final BooleanSetting boxes = new BooleanSetting("方框", true);
+    private final BooleanSetting fill = new BooleanSetting("填充", false);
+    private final BooleanSetting tracerLines = new BooleanSetting("连线", false);
+    private final BooleanSetting players = new BooleanSetting("玩家", true);
+    private final BooleanSetting mobs = new BooleanSetting("怪物", true);
+    private final BooleanSetting animals = new BooleanSetting("动物", false);
+    private final BooleanSetting others = new BooleanSetting("其他实体", false);
+    private final DoubleSetting range = new DoubleSetting("范围", 64.0, 16.0, 128.0, 8.0);
+    private final DoubleSetting fillAlpha = new DoubleSetting("填充透明度", 0.2, 0.05, 0.6, 0.05);
 
     public ESP() {
-        super("ESP", "透视", "在实体周围绘制高亮框。", Category.Render);
-        addSetting(box);
-        addSetting(tracers);
+        super("ESP", "实体透视", "在实体周围绘制高亮框与连线，可穿透墙壁。", Category.Render);
+        addSetting(boxes);
+        addSetting(fill);
+        addSetting(tracerLines);
+        addSetting(players);
+        addSetting(mobs);
+        addSetting(animals);
+        addSetting(others);
+        addSetting(range);
+        addSetting(fillAlpha);
     }
 
     @EventHandler
     public void onRender3D(Render3DEvent event) {
-        if (mc.player == null || mc.world == null) return;
-
-        for (Entity entity : mc.world.getEntities()) {
-            if (entity instanceof LivingEntity && entity != mc.player) {
-                 if (box.get()) {
-                     // Render Box Logic
-                 }
-                 if (tracers.get()) {
-                     // Render Tracers Logic
-                 }
-            }
+        if (mc.player == null || mc.world == null) {
+            return;
         }
+        if (!boxes.get() && !fill.get() && !tracerLines.get()) {
+            return;
+        }
+
+        RenderUtils.begin3D();
+        try {
+            for (Entity entity : mc.world.getEntities()) {
+                if (!shouldRender(entity)) {
+                    continue;
+                }
+
+                float delta = event.getTickDelta();
+                Vec3d lerped = entity.getLerpedPos(delta);
+                Box box = entity.getBoundingBox().offset(
+                        lerped.x - entity.getX(),
+                        lerped.y - entity.getY(),
+                        lerped.z - entity.getZ());
+
+                int color = getColor(entity);
+
+                if (fill.get()) {
+                    int alpha = (int) (fillAlpha.get() * 255);
+                    int fillColor = (Math.max(0, Math.min(255, alpha)) << 24) | (color & 0xFFFFFF);
+                    RenderUtils.drawBoxFill(event.getMatrices(), event.getCamera(), box, fillColor);
+                }
+
+                if (boxes.get()) {
+                    RenderUtils.drawBoxOutline(event.getMatrices(), event.getCamera(), box, color);
+                }
+
+                if (tracerLines.get()) {
+                    Vec3d eye = event.getCamera().getPos();
+                    RenderUtils.drawLine(event.getMatrices(), event.getCamera(), eye, box.getCenter(), color);
+                }
+            }
+        } finally {
+            RenderUtils.end3D();
+        }
+    }
+
+    private boolean shouldRender(Entity entity) {
+        if (entity == mc.player || !entity.isAlive()) {
+            return false;
+        }
+        if (!(entity instanceof LivingEntity)) {
+            return others.get();
+        }
+        if (mc.player.squaredDistanceTo(entity) > range.get() * range.get()) {
+            return false;
+        }
+        return isTypeEnabled(entity);
+    }
+
+    private boolean isTypeEnabled(Entity entity) {
+        if (entity instanceof PlayerEntity) {
+            return players.get();
+        }
+        if (entity instanceof Monster) {
+            return mobs.get();
+        }
+        if (entity instanceof AnimalEntity) {
+            return animals.get();
+        }
+        return others.get();
+    }
+
+    private int getColor(Entity entity) {
+        if (entity instanceof PlayerEntity) {
+            return 0xFFFF5555;
+        }
+        if (entity instanceof Monster) {
+            return 0xFFE0A030;
+        }
+        if (entity instanceof AnimalEntity) {
+            return 0xFF55CC55;
+        }
+        return 0xFF909090;
     }
 }
