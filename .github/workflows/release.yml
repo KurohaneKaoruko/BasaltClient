@@ -1,0 +1,48 @@
+# 自动发布：推送 v* 标签时构建并创建 GitHub Release，附上双加载器 mod 文件
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: validate gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
+      - name: setup jdk
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'microsoft'
+
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: build mod jars
+        run: ./gradlew build
+
+      - name: create release with mod files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" \
+            --title "玄武岩CLIENT $TAG" \
+            --notes "自动构建发布。
+          ## 文件说明
+          - \`basalt-client-fabric-*.jar\` — Fabric 版（需要 Fabric Loader + Fabric API）
+          - \`basalt-client-neoforge-*.jar\` — NeoForge 版
+
+          ## 安装
+          将对应加载器的 jar 放入 \`.minecraft/mods\` 即可。" \
+            fabric/build/libs/basalt-client-fabric-*.jar \
+            neoforge/build/libs/basalt-client-neoforge-*.jar
