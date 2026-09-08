@@ -27,10 +27,10 @@ public class MixinLevelRenderer {
         EventBus.post(new Render3DEvent(matrixStack, tickCounter.getGameTimeDeltaPartialTick(true), camera));
     }
 
-    /** Fullbright Luminance 模式 + XRay：拦截逐顶点光照计算，返回最大光照值。 */
+    /** Fullbright：拦截逐顶点光照计算，始终返回最大光照值（天空 15 + 方块 15）。 */
     @Inject(method = "getLightColor(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/core/BlockPos;)I", at = @At("HEAD"), cancellable = true)
     private static void onGetLightColor(BlockAndTintGetter level, BlockPos pos, CallbackInfoReturnable<Integer> cir) {
-        if (BasaltClient.FULLBRIGHT_ENABLED || BasaltClient.XRAY_ENABLED) {
+        if (BasaltClient.FULLBRIGHT_ENABLED) {
             cir.setReturnValue(0xF000F0);
         }
     }

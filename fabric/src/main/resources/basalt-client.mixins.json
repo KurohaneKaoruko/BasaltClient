@@ -13,11 +13,12 @@
 		"MixinLevelRenderer",
 		"MixinKeyboard",
 		"MixinMouseHandler",
+		"MixinOptionInstance",
 		"MixinGameRenderer",
+		"MixinLightTexture",
 		"MixinGui",
 		"MixinCamera",
 		"MixinDeltaTracker",
-		"MixinLightTexture",
 		"MixinClientPacketListener",
 		"IMinecraftAccessor"
 	],
