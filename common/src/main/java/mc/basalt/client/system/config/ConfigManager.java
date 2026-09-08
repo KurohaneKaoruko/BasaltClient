@@ -64,6 +64,7 @@ public class ConfigManager {
         themeJson.addProperty("listMode", ThemeManager.get().getListMode());
         themeJson.addProperty("hudBackground", ThemeManager.get().isHudBackgroundEnabled());
         themeJson.addProperty("hudBackgroundAlpha", ThemeManager.get().getHudBackgroundAlpha());
+        themeJson.addProperty("language", ThemeManager.get().getLanguage());
         json.add("theme", themeJson);
 
         // HUD 布局（锚点 + 偏移，分辨率无关）
@@ -151,6 +152,9 @@ public class ConfigManager {
                     }
                     if (themeJson.has("hudBackground")) {
                         ThemeManager.get().setHudBackgroundEnabled(themeJson.get("hudBackground").getAsBoolean());
+                    }
+                    if (themeJson.has("language")) {
+                        ThemeManager.get().setLanguage(themeJson.get("language").getAsString());
                     }
                     if (themeJson.has("hudBackgroundAlpha")) {
                         ThemeManager.get().setHudBackgroundAlpha(themeJson.get("hudBackgroundAlpha").getAsFloat());

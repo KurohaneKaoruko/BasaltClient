@@ -2,6 +2,8 @@ package mc.basalt.client.system.modules;
 
 import mc.basalt.client.event.EventBus;
 import mc.basalt.client.system.config.ConfigManager;
+import mc.basalt.client.system.config.PresetManager;
+import mc.basalt.client.ui.theme.Lang;
 import mc.basalt.client.system.settings.Setting;
 import mc.basalt.client.ui.notifications.NotificationManager;
 import net.minecraft.client.Minecraft;
@@ -56,7 +58,8 @@ public abstract class Module {
         EventBus.subscribe(this);
         onEnable();
         if (!batchApplying) {
-            NotificationManager.success(getDisplayName(), "已开启");
+            NotificationManager.success(Lang.moduleDisplayName(this), Lang.get("已开启", "enabled"));
+            PresetManager.invalidateActive();
             saveIfInGame();
         }
     }
@@ -69,7 +72,8 @@ public abstract class Module {
         EventBus.unsubscribe(this);
         onDisable();
         if (!batchApplying) {
-            NotificationManager.show(getDisplayName(), "已关闭", NotificationManager.Type.INFO, 1500);
+            NotificationManager.show(Lang.moduleDisplayName(this), Lang.get("已关闭", "disabled"), NotificationManager.Type.INFO, 1500);
+            PresetManager.invalidateActive();
             saveIfInGame();
         }
     }
@@ -127,6 +131,12 @@ public abstract class Module {
     }
 
     public String getKeyName() {
+        // 鼠标按键绑定（负数编码区，见 MouseEvent.encode）：显示为 鼠标1/鼠标2/...（1-based）
+        if (key <= -100) {
+            int button = -key - 100;
+            return "鼠标" + (button + 1);
+        }
+
         if (key < 0) {
             return "NONE";
         }

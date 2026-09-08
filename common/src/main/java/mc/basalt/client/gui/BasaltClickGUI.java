@@ -7,6 +7,8 @@ import mc.basalt.client.BasaltClient;
 import mc.basalt.client.system.modules.Category;
 import mc.basalt.client.system.modules.Module;
 import mc.basalt.client.system.modules.Modules;
+import mc.basalt.client.ui.theme.Lang;
+import mc.basalt.client.ui.theme.Lang;
 import mc.basalt.client.ui.theme.ThemeManager;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
@@ -65,7 +67,7 @@ public class BasaltClickGUI extends Screen {
         searchBox = new EditBox(this.font, PANEL_X, 8, Math.min(230, this.width - PANEL_X * 2), 18,
                 Component.literal("搜索"));
         searchBox.setMaxLength(32);
-        searchBox.setHint(Component.literal("搜索模块..."));
+        searchBox.setHint(Component.literal(Lang.get("搜索模块...", "Search modules...")));
         this.addRenderableWidget(searchBox);
     }
 
@@ -83,12 +85,15 @@ public class BasaltClickGUI extends Screen {
         int searchWidthNow = Math.min(230, this.width - PANEL_X * 2);
         int themeX = PANEL_X + searchWidthNow + 6;
         int presetX = themeX + BUTTON_WIDTH + 4;
+        int settingsX = presetX + BUTTON_WIDTH + 4;
         gearHover = mouseX >= themeX && mouseX <= themeX + BUTTON_WIDTH && mouseY >= 8 && mouseY <= 26;
         presetHover = mouseX >= presetX && mouseX <= presetX + BUTTON_WIDTH && mouseY >= 8 && mouseY <= 26;
+        settingsHover = mouseX >= settingsX && mouseX <= settingsX + BUTTON_WIDTH && mouseY >= 8 && mouseY <= 26;
 
         // 顶栏功能按钮（搜索输入框由 super.render 绘制）
-        drawTopButton(context, themeX, 8, "主题", gearHover);
-        drawTopButton(context, presetX, 8, "预设", presetHover);
+        drawTopButton(context, themeX, 8, Lang.get("主题", "Theme"), gearHover);
+        drawTopButton(context, presetX, 8, Lang.get("预设", "Presets"), presetHover);
+        drawTopButton(context, settingsX, 8, Lang.get("设置", "GUI"), settingsHover);
 
         String tooltipText = null;
         for (CategoryLayout layout : buildLayouts()) {
@@ -120,12 +125,12 @@ public class BasaltClickGUI extends Screen {
 
                 if (isHovered) {
                     context.fill(layout.x(), moduleY, layout.x() + CATEGORY_WIDTH, moduleY + MODULE_HEIGHT, HOVER_OVERLAY);
-                    tooltipText = module.getDescription();
+                    tooltipText = Lang.moduleDescription(module);
                 }
 
                 GuiUtil.border(context, layout.x(), moduleY, CATEGORY_WIDTH, MODULE_HEIGHT, BORDER_COLOR);
 
-                Component moduleText = Component.literal(module.getDisplayName());
+                Component moduleText = Component.literal(Lang.moduleDisplayName(module));
                 int moduleTextColor = module.isEnabled() ? 0xFFFFFF : 0xAAAAAA;
                 context.drawString(font, moduleText, layout.x() + 6, moduleY + 5, moduleTextColor);
 
@@ -147,7 +152,7 @@ public class BasaltClickGUI extends Screen {
 
         context.drawString(
                 font,
-                Component.literal("左键: 开关  右键: 设置  中键: 绑定  标题: 折叠"),
+                Component.literal(Lang.get("左键: 开关  右键: 设置  中键: 绑定  标题: 折叠", "LMB: Toggle  RMB: Settings  MMB: Bind  Header: Collapse")),
                 10,
                 this.height - 14,
                 0xB0B0B0
@@ -162,6 +167,7 @@ public class BasaltClickGUI extends Screen {
         int searchWidth = Math.min(230, this.width - PANEL_X * 2);
         int themeX = PANEL_X + searchWidth + 6;
         int presetX = themeX + BUTTON_WIDTH + 4;
+        int settingsX = presetX + BUTTON_WIDTH + 4;
         if (button == 0 && mouseY >= 8 && mouseY <= 26) {
             if (mouseX >= themeX && mouseX <= themeX + BUTTON_WIDTH) {
                 if (this.minecraft != null) {
@@ -172,6 +178,12 @@ public class BasaltClickGUI extends Screen {
             if (mouseX >= presetX && mouseX <= presetX + BUTTON_WIDTH) {
                 if (this.minecraft != null) {
                     this.minecraft.setScreen(new PresetScreen(this));
+                }
+                return true;
+            }
+            if (mouseX >= settingsX && mouseX <= settingsX + BUTTON_WIDTH) {
+                if (this.minecraft != null) {
+                    this.minecraft.setScreen(new GuiSettingsScreen(this));
                 }
                 return true;
             }
@@ -233,6 +245,7 @@ public class BasaltClickGUI extends Screen {
     private static final int BUTTON_WIDTH = 44;
     private boolean gearHover;
     private boolean presetHover;
+    private boolean settingsHover;
 
     private List<CategoryLayout> buildLayouts() {
         List<CategoryLayout> layouts = new ArrayList<>();
@@ -273,7 +286,7 @@ public class BasaltClickGUI extends Screen {
         String needle = query.toLowerCase(Locale.ROOT);
         return modules.stream()
                 .filter(module -> module.getName().toLowerCase(Locale.ROOT).contains(needle)
-                        || module.getDisplayName().toLowerCase(Locale.ROOT).contains(needle)
+                        || Lang.moduleDisplayName(module).toLowerCase(Locale.ROOT).contains(needle)
                         || module.getDescription().toLowerCase(Locale.ROOT).contains(needle))
                 .toList();
     }
@@ -296,18 +309,21 @@ public class BasaltClickGUI extends Screen {
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
-        // 为 logo 纹理启用双线性 + mipmap 过滤（仅需一次），避免大图缩小到 150px 时的锯齿边缘
+        // 为 logo 纹理启用双线性过滤（仅需一次）。注意不能开 mipmap：
+        // 1.21.4 的上传路径未生成 mipmap 层级，采样不完整纹理会导致 logo 整体不可见
         if (minecraft != null && !logoFilterApplied) {
             try {
                 AbstractTexture texture = minecraft.getTextureManager().getTexture(LOGO);
                 RenderSystem.bindTexture(texture.getId());
-                texture.setFilter(true, true);
+                texture.setFilter(true, false);
                 logoFilterApplied = true;
             } catch (Exception ignored) {
                 // 纹理尚未就绪时下一帧重试
             }
         }
 
+        // 1.21.4 blit 参数顺序: (x, y, u, v, uWidth, vHeight, regionW, regionH, texW, texH)
+        // u/v 为浮点且在宽高之前——顺序错误会静默采样越界区域导致不可见
         context.blit(
                 LOGO,
                 this.width - logoWidth - margin,
