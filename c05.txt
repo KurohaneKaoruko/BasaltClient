@@ -1,0 +1,6 @@
+Exception in thread "main" java.io.FileNotFoundException: D:\.Programs\.Program.Project\Basalt-Client\.gradle-user-home\wrapper\dists\gradle-8.12.1-bin\e43pro19uf94eaiwrwsbbpf55\gradle-8.12.1-bin.zip.lck (�ܾ����ʡ�)
+	at java.base/java.io.RandomAccessFile.open0(Native Method)
+	at java.base/java.io.RandomAccessFile.open(RandomAccessFile.java:356)
+	at java.base/java.io.RandomAccessFile.<init>(RandomAccessFile.java:273)
+	at java.base/java.io.RandomAccessFile.<init>(RandomAccessFile.java:223)
+	at org.gradle.wrapper.GradleWrapperMain.main(SourceFile:67)

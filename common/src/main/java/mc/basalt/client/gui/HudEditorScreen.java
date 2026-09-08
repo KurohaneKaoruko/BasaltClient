@@ -5,6 +5,7 @@ import mc.basalt.client.utils.GuiUtil;
 import mc.basalt.client.system.config.ConfigManager;
 import mc.basalt.client.ui.hud.HudElement;
 import mc.basalt.client.ui.hud.HudManager;
+import mc.basalt.client.ui.theme.Lang;
 import mc.basalt.client.ui.theme.ThemeManager;
 import mc.basalt.client.ui.notifications.NotificationManager;
 import net.minecraft.client.gui.GuiGraphics;

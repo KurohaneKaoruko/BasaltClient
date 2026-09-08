@@ -12,7 +12,7 @@ public class MixinLightTexture {
     @ModifyArgs(method = "updateLightTexture", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/NativeImage;setPixelRGBA(III)V"))
     private void updateColor(Args args) {
         if (BasaltClient.FULLBRIGHT_ENABLED) {
-            args.set(2, 0xFFFFFFFF); // 强制全亮度（白色）
+            args.set(2, 0xFFFFFFFF);
         }
     }
 }

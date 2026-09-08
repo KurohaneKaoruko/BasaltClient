@@ -7,6 +7,8 @@ import mc.basalt.client.system.settings.BooleanSetting;
 import mc.basalt.client.system.settings.DoubleSetting;
 import mc.basalt.client.system.settings.ModeSetting;
 import mc.basalt.client.system.settings.Setting;
+import mc.basalt.client.ui.theme.Lang;
+import mc.basalt.client.system.config.PresetManager;
 import mc.basalt.client.ui.theme.ThemeManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -100,10 +102,10 @@ public class ModuleSettingsScreen extends Screen {
 
         this.toggleButton = new BasaltButton(
                 contentStartX, baseY, CONTENT_WIDTH, 20,
-                Component.literal(module.isEnabled() ? "状态: 开启" : "状态: 关闭"),
+                Component.literal(module.isEnabled() ? Lang.get("状态: 开启", "State: ON") : Lang.get("状态: 关闭", "State: OFF")),
                 button -> {
                     module.toggle();
-                    button.setMessage(Component.literal(module.isEnabled() ? "状态: 开启" : "状态: 关闭"));
+                    button.setMessage(Component.literal(module.isEnabled() ? Lang.get("状态: 开启", "State: ON") : Lang.get("状态: 关闭", "State: OFF")));
                 });
         this.addRenderableWidget(toggleButton);
         rows.add(new Row(toggleButton, baseY));
@@ -126,10 +128,11 @@ public class ModuleSettingsScreen extends Screen {
             if (setting instanceof BooleanSetting boolSetting) {
                 widget = new BasaltButton(
                         contentStartX, baseY, CONTENT_WIDTH, 20,
-                        Component.literal(boolSetting.getName() + ": " + (boolSetting.get() ? "开" : "关")),
+                        Component.literal(boolSetting.getName() + ": " + (boolSetting.get() ? Lang.get("开", "ON") : Lang.get("关", "OFF"))),
                         btn -> {
                             boolSetting.toggle();
-                            btn.setMessage(Component.literal(boolSetting.getName() + ": " + (boolSetting.get() ? "开" : "关")));
+                            PresetManager.invalidateActive();
+                            btn.setMessage(Component.literal(boolSetting.getName() + ": " + (boolSetting.get() ? Lang.get("开", "ON") : Lang.get("关", "OFF"))));
                         });
             } else if (setting instanceof ModeSetting modeSetting) {
                 widget = new BasaltButton(
@@ -137,6 +140,7 @@ public class ModuleSettingsScreen extends Screen {
                         Component.literal(modeSetting.getName() + ": " + modeSetting.get()),
                         btn -> {
                             modeSetting.cycle();
+                            PresetManager.invalidateActive();
                             btn.setMessage(Component.literal(modeSetting.getName() + ": " + modeSetting.get()));
                         });
             } else if (setting instanceof DoubleSetting doubleSetting) {
@@ -151,14 +155,14 @@ public class ModuleSettingsScreen extends Screen {
 
         BasaltButton resetButton = new BasaltButton(
                 contentStartX, baseY, CONTENT_WIDTH, 20,
-                Component.literal("重置默认设置"),
+                Component.literal(Lang.get("重置默认设置", "Reset defaults")),
                 button -> resetSettingsToDefaults());
         this.addRenderableWidget(resetButton);
         rows.add(new Row(resetButton, baseY));
 
         BasaltButton backButton = new BasaltButton(
                 contentStartX, windowY + windowHeight - 30, CONTENT_WIDTH, 20,
-                Component.literal("返回"),
+                Component.literal(Lang.get("返回", "Back")),
                 button -> onClose());
         this.addRenderableWidget(backButton);
 
@@ -190,7 +194,7 @@ public class ModuleSettingsScreen extends Screen {
         context.drawString(this.font, this.title, windowX + 10, windowY + 8, ACCENT_COLOR);
 
         // 模块描述（超长截断）
-        String desc = this.font.plainSubstrByWidth(module.getDescription(), windowWidth - 20);
+        String desc = this.font.plainSubstrByWidth(Lang.moduleDescription(module), windowWidth - 20);
         context.drawString(this.font, Component.literal(desc), windowX + 10, windowY + 21, 0x909090);
         context.fill(windowX, windowY + 33, windowX + windowWidth, windowY + 34, BORDER_COLOR);
 
@@ -208,7 +212,7 @@ public class ModuleSettingsScreen extends Screen {
         if (waitingForBind) {
             context.drawCenteredString(
                     this.font,
-                    Component.literal("按任意键绑定 (ESC 清除)"),
+                    Component.literal(Lang.get("按任意键绑定 (ESC 清除)", "Press any key (ESC to clear)")),
                     windowX + windowWidth / 2,
                     windowY + windowHeight - 42,
                     ACCENT_COLOR);
@@ -248,6 +252,19 @@ public class ModuleSettingsScreen extends Screen {
     }
 
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        // 绑定模式：捕获任意鼠标按键（含左/右/中/侧键），ESC 取消
+        if (waitingForBind) {
+            module.setKey(mc.basalt.client.event.events.MouseEvent.encode(button));
+            waitingForBind = false;
+            updateKeyBindButtonLabel();
+            return true;
+        }
+
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
     public void onClose() {
         if (this.minecraft != null) {
             this.minecraft.setScreen(this.parent);
@@ -260,11 +277,11 @@ public class ModuleSettingsScreen extends Screen {
         }
 
         if (waitingForBind) {
-            keyBindButton.setMessage(Component.literal("按键绑定: <按任意键>"));
+            keyBindButton.setMessage(Component.literal(Lang.get("按键绑定: <按任意键>", "Bind: <any key>")));
             return;
         }
 
-        keyBindButton.setMessage(Component.literal("按键绑定: " + module.getKeyName()));
+        keyBindButton.setMessage(Component.literal(Lang.get("按键绑定: ", "Bind: ") + module.getKeyName()));
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -356,6 +373,7 @@ public class ModuleSettingsScreen extends Screen {
 
             double range = setting.getMax() - setting.getMin();
             setting.set(setting.getMin() + (range * percent));
+            PresetManager.invalidateActive();
             updateMessage();
         }
 

@@ -12,6 +12,8 @@
 		"MixinMinecraft",
 		"MixinLevelRenderer",
 		"MixinKeyboard",
+		"MixinMouseHandler",
+		"MixinGameRenderer",
 		"MixinGui",
 		"MixinCamera",
 		"MixinDeltaTracker",

@@ -18,17 +18,7 @@ public class MixinBlock {
     private static void shouldRenderFace(BlockState state, BlockGetter world, BlockPos pos, Direction side,
             BlockPos otherPos, CallbackInfoReturnable<Boolean> cir) {
         if (BasaltClient.XRAY_ENABLED) {
-            // Check if block is an ore/visible block
-            // Accessing XRay instance requires modules init
-            if (XRay.isOre(state.getBlock())) {
-                cir.setReturnValue(true);
-            } else {
-                cir.setReturnValue(false);
-            }
+            cir.setReturnValue(XRay.isOre(state.getBlock()));
         }
     }
-
-    // We also need to make non-ores transparent to see through them
-    // This is handled by shouldRenderFace returning false for hidden blocks,
-    // but we also need to ensure occlusion culling doesn't hide ores.
 }
