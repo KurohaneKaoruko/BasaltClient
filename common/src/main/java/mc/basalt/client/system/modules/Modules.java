@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import mc.basalt.client.event.EventBus;
 import mc.basalt.client.event.annotations.EventHandler;
 import mc.basalt.client.event.events.KeyEvent;
+import mc.basalt.client.event.events.MouseEvent;
 import mc.basalt.client.system.modules.combat.AutoArmor;
 import mc.basalt.client.system.modules.combat.AutoClicker;
 import mc.basalt.client.system.modules.combat.AutoCrystal;
@@ -137,6 +138,22 @@ public class Modules {
         if (event.getAction() == GLFW.GLFW_PRESS) {
             for (Module module : modules) {
                 if (module.getKey() == event.getKey()) {
+                    module.toggle();
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onMouse(MouseEvent event) {
+        // 有界面打开时不触发鼠标绑定
+        if (Minecraft.getInstance().screen != null) {
+            return;
+        }
+        if (event.getAction() == GLFW.GLFW_PRESS) {
+            int encoded = MouseEvent.encode(event.getButton());
+            for (Module module : modules) {
+                if (module.getKey() == encoded) {
                     module.toggle();
                 }
             }

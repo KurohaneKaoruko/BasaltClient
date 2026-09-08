@@ -1,5 +1,6 @@
 package mc.basalt.client.system.commands.impl;
 
+import mc.basalt.client.event.events.MouseEvent;
 import mc.basalt.client.system.commands.Command;
 import mc.basalt.client.system.commands.CommandManager;
 import mc.basalt.client.system.modules.Module;
@@ -10,7 +11,7 @@ import java.util.Locale;
 
 public class BindCommand extends Command {
     public BindCommand() {
-        super("bind", "为模块绑定按键", ".bind <模块名> <按键>");
+        super("bind", "为模块绑定按键（鼠标用 mouse1~mouse8）", ".bind <模块名> <按键>");
     }
 
     @Override
@@ -43,6 +44,18 @@ public class BindCommand extends Command {
         String normalized = input.toLowerCase(Locale.ROOT);
         if ("none".equals(normalized) || "无".equals(normalized)) {
             return -1;
+        }
+
+        // 鼠标按键：mouse1~mouse8（1左键 2右键 3中键 4/5 侧键，与 Windows 编号一致）
+        if (normalized.startsWith("mouse") || normalized.startsWith("鼠标")) {
+            String digits = normalized.replaceAll("\\D", "");
+            if (!digits.isEmpty()) {
+                int n = Integer.parseInt(digits);
+                if (n >= 1 && n <= 8) {
+                    return MouseEvent.encode(n - 1);
+                }
+            }
+            return Integer.MIN_VALUE;
         }
 
         try {

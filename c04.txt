@@ -1,0 +1,41 @@
+
+> Configure project :fabric
+Fabric Loom: 1.10.5
+
+> Task :neoforge:createMinecraftArtifacts UP-TO-DATE
+
+> Task :neoforge:compileJava
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+
+> Task :neoforge:processResources UP-TO-DATE
+> Task :neoforge:classes
+> Task :neoforge:jarJar NO-SOURCE
+> Task :fabric:compileJava
+> Task :fabric:processResources UP-TO-DATE
+> Task :fabric:classes
+> Task :neoforge:jar
+> Task :neoforge:assemble
+> Task :neoforge:compileTestJava NO-SOURCE
+> Task :neoforge:processTestResources NO-SOURCE
+> Task :neoforge:testClasses UP-TO-DATE
+> Task :neoforge:test NO-SOURCE
+> Task :neoforge:check UP-TO-DATE
+> Task :neoforge:build
+> Task :fabric:jar
+> Task :fabric:compileTestJava NO-SOURCE
+> Task :fabric:processIncludeJars UP-TO-DATE
+> Task :fabric:processTestResources NO-SOURCE
+> Task :fabric:testClasses UP-TO-DATE
+> Task :fabric:test NO-SOURCE
+> Task :fabric:validateAccessWidener UP-TO-DATE
+> Task :fabric:check UP-TO-DATE
+> Task :fabric:remapJar
+> Task :fabric:remapSourcesJar SKIPPED
+> Task :fabric:assemble
+> Task :fabric:build
+
+[Incubating] Problems report is available at: file:///D:/.Programs/.Program.Project/Basalt-Client/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 19s
+10 actionable tasks: 5 executed, 5 up-to-date

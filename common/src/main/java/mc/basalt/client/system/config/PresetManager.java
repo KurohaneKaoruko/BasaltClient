@@ -32,9 +32,14 @@ public final class PresetManager {
     private PresetManager() {
     }
 
-    /** 当前激活的预设名（null = 未加载）。 */
+    /** 当前激活的预设名（null = 未加载，或加载后配置已被修改）。 */
     public static String getActivePreset() {
         return activePreset;
+    }
+
+    /** 配置发生修改时调用：取消“当前预设”标记。 */
+    public static void invalidateActive() {
+        activePreset = null;
     }
 
     private static File presetsDir() {

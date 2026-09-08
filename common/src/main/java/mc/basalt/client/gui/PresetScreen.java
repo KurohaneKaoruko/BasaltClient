@@ -67,6 +67,14 @@ public class PresetScreen extends Screen {
         return windowY + windowHeight - 54;
     }
 
+    private int closeX() {
+        return windowX + windowWidth - 22;
+    }
+
+    private int closeY() {
+        return windowY + 8;
+    }
+
     private int rowY(int index) {
         return listTop() + 4 + index * (ROW_HEIGHT + 2) - scrollOffset;
     }
@@ -85,6 +93,11 @@ public class PresetScreen extends Screen {
         context.fill(windowX, windowY, windowX + windowWidth, windowY + windowHeight, WINDOW_BG);
         GuiUtil.border(context, windowX, windowY, windowWidth, windowHeight, theme.accent());
         context.drawString(this.font, this.title, windowX + 12, windowY + 12, 0xFFFFFFFF);
+
+        // 关闭按钮（右上角 ✕）
+        boolean hoverClose = mouseX >= closeX() && mouseX <= closeX() + 16 && mouseY >= closeY() && mouseY <= closeY() + 14;
+        context.drawString(this.font, "✕", closeX() + 4, closeY() + 3, hoverClose ? 0xFFE85555 : 0xFF909090);
+
         context.fill(windowX, windowY + 28, windowX + windowWidth, windowY + 29, theme.accent());
 
         int x = windowX + (windowWidth - CONTENT_WIDTH) / 2;
@@ -146,6 +159,12 @@ public class PresetScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        // 关闭按钮
+        if (button == 0 && mouseX >= closeX() && mouseX <= closeX() + 16 && mouseY >= closeY() && mouseY <= closeY() + 14) {
+            onClose();
+            return true;
+        }
+
         int x = windowX + (windowWidth - CONTENT_WIDTH) / 2;
         List<String> presets = PresetManager.list();
 

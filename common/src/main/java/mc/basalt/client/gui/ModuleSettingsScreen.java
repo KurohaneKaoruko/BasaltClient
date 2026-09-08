@@ -7,6 +7,7 @@ import mc.basalt.client.system.settings.BooleanSetting;
 import mc.basalt.client.system.settings.DoubleSetting;
 import mc.basalt.client.system.settings.ModeSetting;
 import mc.basalt.client.system.settings.Setting;
+import mc.basalt.client.system.config.PresetManager;
 import mc.basalt.client.ui.theme.ThemeManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -129,6 +130,7 @@ public class ModuleSettingsScreen extends Screen {
                         Component.literal(boolSetting.getName() + ": " + (boolSetting.get() ? "开" : "关")),
                         btn -> {
                             boolSetting.toggle();
+                            PresetManager.invalidateActive();
                             btn.setMessage(Component.literal(boolSetting.getName() + ": " + (boolSetting.get() ? "开" : "关")));
                         });
             } else if (setting instanceof ModeSetting modeSetting) {
@@ -137,6 +139,7 @@ public class ModuleSettingsScreen extends Screen {
                         Component.literal(modeSetting.getName() + ": " + modeSetting.get()),
                         btn -> {
                             modeSetting.cycle();
+                            PresetManager.invalidateActive();
                             btn.setMessage(Component.literal(modeSetting.getName() + ": " + modeSetting.get()));
                         });
             } else if (setting instanceof DoubleSetting doubleSetting) {
@@ -248,6 +251,19 @@ public class ModuleSettingsScreen extends Screen {
     }
 
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        // 绑定模式：捕获任意鼠标按键（含左/右/中/侧键），ESC 取消
+        if (waitingForBind) {
+            module.setKey(mc.basalt.client.event.events.MouseEvent.encode(button));
+            waitingForBind = false;
+            updateKeyBindButtonLabel();
+            return true;
+        }
+
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
     public void onClose() {
         if (this.minecraft != null) {
             this.minecraft.setScreen(this.parent);
@@ -356,6 +372,7 @@ public class ModuleSettingsScreen extends Screen {
 
             double range = setting.getMax() - setting.getMin();
             setting.set(setting.getMin() + (range * percent));
+            PresetManager.invalidateActive();
             updateMessage();
         }
 
