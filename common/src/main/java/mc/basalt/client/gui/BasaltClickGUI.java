@@ -60,7 +60,12 @@ public class BasaltClickGUI extends Screen {
 
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        this.renderBackground(context, mouseX, mouseY, delta);
+        // 仅当本界面是当前活动界面时才渲染背景（毛玻璃）；
+        // 作为设置弹窗的背景板重绘时跳过，否则 1.21.2+ 的模糊后处理
+        // 会盖住弹窗自身的窗口背景（层级错乱）
+        if (this.minecraft == null || this.minecraft.screen == this) {
+            this.renderBackground(context, mouseX, mouseY, delta);
+        }
 
         renderSearchBar(context);
 
