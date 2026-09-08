@@ -5,7 +5,8 @@
 	"mixins": [
 		"MixinConnection",
 		"MixinPlayerEntity",
-		"MixinBlock"
+		"MixinBlock",
+		"MixinLevel"
 	],
 	"client": [
 		"MixinMinecraft",

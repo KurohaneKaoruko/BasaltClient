@@ -4,6 +4,7 @@ import mc.basalt.client.gui.HudEditorScreen;
 import mc.basalt.client.system.modules.Module;
 import mc.basalt.client.system.modules.Modules;
 import mc.basalt.client.ui.hud.HudElement;
+import mc.basalt.client.ui.theme.ThemeManager;
 import net.minecraft.client.gui.GuiGraphics;
 
 import java.util.Comparator;
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ArrayListElement extends HudElement {
-    private static final int ACCENT_COLOR = 0xFFA060F0;
 
     public ArrayListElement() {
         // 右上角锚点 + 偏移 0 → 列表右侧紧贴屏幕右边缘
@@ -35,14 +35,20 @@ public class ArrayListElement extends HudElement {
             return;
         }
 
-        for (Module module : enabledModules) {
+        ThemeManager theme = ThemeManager.get();
+        int bg = theme.hudBackground();
+
+        for (int i = 0; i < enabledModules.size(); i++) {
+            Module module = enabledModules.get(i);
             String text = module.getDisplayName();
             int textWidth = mc.font.width(text);
             int x = getX() + width - textWidth;
 
-            context.fill(x - 2, y - 2, getX() + width, y + mc.font.lineHeight + 1, 0x80000000);
-            context.fill(getX() + width - 1, y - 2, getX() + width, y + mc.font.lineHeight + 1, ACCENT_COLOR);
-            context.drawString(mc.font, text, x, y, 0xFFFFFF);
+            if (bg != 0) {
+                context.fill(x - 2, y - 2, getX() + width, y + mc.font.lineHeight + 1, bg);
+            }
+            context.fill(getX() + width - 1, y - 2, getX() + width, y + mc.font.lineHeight + 1, theme.listColor(i));
+            context.drawString(mc.font, text, x, y, 0xFFFFFFFF);
 
             y += mc.font.lineHeight + 2;
         }

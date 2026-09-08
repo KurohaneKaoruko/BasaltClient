@@ -44,8 +44,35 @@ neoforge/  NeoForge 模块（ModDevGradle 构建，@Mod 入口 + neoforge.mods.t
 | `.bind <模块> <按键>` | 绑定按键 |
 | `.panic` | 一键关闭所有模块 |
 | `.hud` | 打开 HUD 编辑器 |
+| `.theme` | 打开主题设置 |
+| `.preset save/load/list/delete <名称>` | 配置预设（不同场景快速切换） |
 
-ClickGUI 内：**左键** 开关模块，**右键** 打开设置，**中键** 直接绑定按键，直接打字即可搜索。
+ClickGUI 内：**左键** 开关模块，**右键** 打开设置，**中键** 直接绑定按键，**彩** 打开主题设置，**预** 循环切换预设，直接打字即可搜索。
+
+## 个性化主题
+
+`.theme` 或 ClickGUI 搜索栏旁的"彩"按钮打开：
+
+- **主色调**：RGB 滑条自由取色 + 12 种预设色板
+- **彩虹模式**：主色随时间循环渐变，可调速度
+- **模块列表样式**：主色 / 白色 / 彩虹
+- **HUD 背景**：开关与不透明度调节
+
+主题应用于 ClickGUI、设置界面、HUD 编辑器、水印与模块列表，实时生效并持久化。
+
+## 配置预设
+
+为不同场景保存整套配置（模块开关 + 参数），一键切换：
+
+```text
+.preset save pvp      # 将当前配置保存为 "pvp" 预设
+.preset save 挖矿      # 支持中文命名
+.preset load pvp      # 切换到 "pvp"
+.preset list          # 查看全部预设（标注当前）
+.preset delete pvp    # 删除
+```
+
+ClickGUI 中的"预"按钮可循环切换预设。预设文件位于 `.minecraft/basalt/presets/`。
 
 ## 功能列表
 
@@ -57,6 +84,7 @@ ClickGUI 内：**左键** 开关模块，**右键** 打开设置，**中键** �
 - **AutoCrystal** 自动水晶 — 自动放置与破坏末影水晶
 - **Criticals** 刀刀暴击 — 攻击时自动暴击（Packet/Jump）
 - **AutoClicker** 自动连点 — 按住攻击键自动连点（CPS 区间）
+- **TriggerBot** 触发机器人 — 准星对准实体时自动攻击
 
 ### Movement（移动）
 - **Flight** 飞行 — 生存飞行，可调速度
@@ -75,6 +103,8 @@ ClickGUI 内：**左键** 开关模块，**右键** 打开设置，**中键** �
 - **Fullbright** 夜视
 - **XRay** 矿物透视 — 只显示矿物
 - **Freecam** 自由视角 — 相机脱离身体，身体原地冻结
+- **Zoom** 缩放 — 望远镜效果（可调 FOV）
+- **NoWeather** 无天气 — 客户端清除雨雪
 
 ### Player（玩家）
 - **FastPlace** 快速放置

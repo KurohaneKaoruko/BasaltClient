@@ -7,7 +7,9 @@ import mc.basalt.client.BasaltClient;
 import mc.basalt.client.system.modules.Category;
 import mc.basalt.client.system.modules.Module;
 import mc.basalt.client.system.modules.Modules;
+import mc.basalt.client.ui.theme.ThemeManager;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.AbstractTexture;
@@ -49,7 +51,8 @@ public class BasaltClickGUI extends Screen {
     private static final int MODULE_GAP = 1;
 
     private final Map<Category, Boolean> categoryExpanded = new EnumMap<>(Category.class);
-    private String searchQuery = "";
+    /** 搜索输入框（带光标/占位提示的原生输入体验）。 */
+    private EditBox searchBox;
 
     public BasaltClickGUI() {
         super(Component.literal("ClickGUI"));
@@ -59,15 +62,34 @@ public class BasaltClickGUI extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        // 仅当本界面是当前活动界面时才渲染背景（毛玻璃）；
-        // 作为设置弹窗的背景板重绘时跳过，否则 1.21.2+ 的模糊后处理
-        // 会盖住弹窗自身的窗口背景（层级错乱）
-        if (this.minecraft == null || this.minecraft.screen == this) {
-            this.renderBackground(context, mouseX, mouseY, delta);
-        }
+    protected void init() {
+        searchBox = new EditBox(this.font, PANEL_X, 8, Math.min(230, this.width - PANEL_X * 2), 18,
+                Component.literal("搜索"));
+        searchBox.setMaxLength(32);
+        searchBox.setHint(Component.literal("搜索模块..."));
+        this.addRenderableWidget(searchBox);
+    }
 
-        renderSearchBar(context);
+    private String searchQuery() {
+        return searchBox != null ? searchBox.getValue() : "";
+    }
+
+    @Override
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        // 自绘暗色遮罩。不调用 renderBackground：
+        // 1.21.2+ 的模糊后处理为帧末延迟合成，会把本帧已绘制的面板等内容一并覆盖
+        context.fill(0, 0, this.width, this.height, 0xC00E0E12);
+
+        // 顶栏按钮悬停状态
+        int searchWidthNow = Math.min(230, this.width - PANEL_X * 2);
+        int themeX = PANEL_X + searchWidthNow + 6;
+        int presetX = themeX + BUTTON_WIDTH + 4;
+        gearHover = mouseX >= themeX && mouseX <= themeX + BUTTON_WIDTH && mouseY >= 8 && mouseY <= 26;
+        presetHover = mouseX >= presetX && mouseX <= presetX + BUTTON_WIDTH && mouseY >= 8 && mouseY <= 26;
+
+        // 顶栏功能按钮（搜索输入框由 super.render 绘制）
+        drawTopButton(context, themeX, 8, "主题", gearHover);
+        drawTopButton(context, presetX, 8, "预设", presetHover);
 
         String tooltipText = null;
         for (CategoryLayout layout : buildLayouts()) {
@@ -92,7 +114,7 @@ public class BasaltClickGUI extends Screen {
 
                 if (module.isEnabled()) {
                     context.fillGradient(layout.x(), moduleY, layout.x() + CATEGORY_WIDTH, moduleY + MODULE_HEIGHT, MODULE_BG_ENABLED_START, MODULE_BG_ENABLED_END);
-                    context.fill(layout.x(), moduleY, layout.x() + 2, moduleY + MODULE_HEIGHT, ACCENT_COLOR);
+                    context.fill(layout.x(), moduleY, layout.x() + 2, moduleY + MODULE_HEIGHT, ThemeManager.get().accent());
                 } else {
                     context.fill(layout.x(), moduleY, layout.x() + CATEGORY_WIDTH, moduleY + MODULE_HEIGHT, MODULE_BG_DISABLED);
                 }
@@ -121,9 +143,12 @@ public class BasaltClickGUI extends Screen {
             context.renderTooltip(font, Component.literal(tooltipText), mouseX, mouseY);
         }
 
+        // 搜索输入框等原版控件
+        super.render(context, mouseX, mouseY, delta);
+
         context.drawString(
                 font,
-                Component.literal("左键: 开关  右键: 设置  中键: 绑定  标题: 折叠  直接输入: 搜索"),
+                Component.literal("左键: 开关  右键: 设置  中键: 绑定  标题: 折叠"),
                 10,
                 this.height - 14,
                 0xB0B0B0
@@ -134,6 +159,25 @@ public class BasaltClickGUI extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        // 顶栏功能按钮
+        int searchWidth = Math.min(230, this.width - PANEL_X * 2);
+        int themeX = PANEL_X + searchWidth + 6;
+        int presetX = themeX + BUTTON_WIDTH + 4;
+        if (button == 0 && mouseY >= 8 && mouseY <= 26) {
+            if (mouseX >= themeX && mouseX <= themeX + BUTTON_WIDTH) {
+                if (this.minecraft != null) {
+                    this.minecraft.setScreen(new ThemeScreen(this));
+                }
+                return true;
+            }
+            if (mouseX >= presetX && mouseX <= presetX + BUTTON_WIDTH) {
+                if (this.minecraft != null) {
+                    this.minecraft.setScreen(new PresetScreen(this));
+                }
+                return true;
+            }
+        }
+
         for (CategoryLayout layout : buildLayouts()) {
             int headerX1 = layout.x();
             int headerY1 = layout.y();
@@ -179,43 +223,17 @@ public class BasaltClickGUI extends Screen {
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_BACKSPACE && !searchQuery.isEmpty()) {
-            searchQuery = searchQuery.substring(0, searchQuery.length() - 1);
-            return true;
-        }
-
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE && !searchQuery.isEmpty()) {
-            searchQuery = "";
-            return true;
-        }
-
-        return super.keyPressed(keyCode, scanCode, modifiers);
+    /** 顶栏文字按钮。 */
+    private void drawTopButton(GuiGraphics context, int x, int y, String label, boolean hover) {
+        context.fill(x, y, x + BUTTON_WIDTH, y + 18, hover ? MODULE_BG_ENABLED_START : HEADER_BG);
+        GuiUtil.border(context, x, y, BUTTON_WIDTH, 18, hover ? ThemeManager.get().accent() : BORDER_COLOR);
+        context.drawString(font, Component.literal(label), x + (BUTTON_WIDTH - font.width(label)) / 2, y + 5,
+                hover ? 0xFFFFFFFF : 0xFFC8C8D0);
     }
 
-    @Override
-    public boolean charTyped(char chr, int modifiers) {
-        if (!Character.isISOControl(chr)) {
-            searchQuery += chr;
-            return true;
-        }
-
-        return super.charTyped(chr, modifiers);
-    }
-
-    private void renderSearchBar(GuiGraphics context) {
-        int searchX = PANEL_X;
-        int searchY = 8;
-        int searchWidth = Math.min(260, this.width - PANEL_X * 2);
-        int searchHeight = 18;
-
-        context.fill(searchX, searchY, searchX + searchWidth, searchY + searchHeight, HEADER_BG);
-        GuiUtil.border(context, searchX, searchY, searchWidth, searchHeight, BORDER_COLOR);
-
-        String query = searchQuery.isEmpty() ? "(所有模块)" : searchQuery;
-        context.drawString(font, Component.literal("搜索: " + query), searchX + 6, searchY + 5, ACCENT_COLOR);
-    }
+    private static final int BUTTON_WIDTH = 44;
+    private boolean gearHover;
+    private boolean presetHover;
 
     private List<CategoryLayout> buildLayouts() {
         List<CategoryLayout> layouts = new ArrayList<>();
@@ -248,11 +266,12 @@ public class BasaltClickGUI extends Screen {
 
     private List<Module> getFilteredModules(Category category) {
         List<Module> modules = Modules.get().getByCategory(category);
-        if (searchQuery.isBlank()) {
+        String query = searchQuery();
+        if (query.isBlank()) {
             return modules;
         }
 
-        String needle = searchQuery.toLowerCase(Locale.ROOT);
+        String needle = query.toLowerCase(Locale.ROOT);
         return modules.stream()
                 .filter(module -> module.getName().toLowerCase(Locale.ROOT).contains(needle)
                         || module.getDisplayName().toLowerCase(Locale.ROOT).contains(needle)
@@ -295,15 +314,22 @@ public class BasaltClickGUI extends Screen {
                 LOGO,
                 this.width - logoWidth - margin,
                 this.height - logoHeight - margin,
-                0.0f,
-                0.0f,
                 logoWidth,
                 logoHeight,
+                0,
+                0,
+                LOGO_TEXTURE_WIDTH,
+                LOGO_TEXTURE_HEIGHT,
                 LOGO_TEXTURE_WIDTH,
                 LOGO_TEXTURE_HEIGHT
         );
 
         RenderSystem.disableBlend();
+    }
+
+    /** 禁用原版背景（毛玻璃为帧末延迟合成，会覆盖 GUI 内容）。 */
+    @Override
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
     }
 
     @Override

@@ -5,6 +5,7 @@ import mc.basalt.client.utils.GuiUtil;
 import mc.basalt.client.system.config.ConfigManager;
 import mc.basalt.client.ui.hud.HudElement;
 import mc.basalt.client.ui.hud.HudManager;
+import mc.basalt.client.ui.theme.ThemeManager;
 import mc.basalt.client.ui.notifications.NotificationManager;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -52,7 +53,7 @@ public class HudEditorScreen extends Screen {
         for (HudElement element : elements) {
             int w = Math.max(element.getWidth(), 10);
             int h = Math.max(element.getHeight(), 8);
-            int border = element.isEnabled() ? 0xFFA060F0 : 0xFF707070;
+            int border = element.isEnabled() ? ThemeManager.get().accent() : 0xFF707070;
 
             GuiUtil.border(context, element.getX(), element.getY(), w, h, border);
 
