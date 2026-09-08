@@ -1,0 +1,42 @@
+Starting a Gradle Daemon, 1 busy and 1 stopped Daemons could not be reused, use --status for details
+
+> Configure project :fabric
+Fabric Loom: 1.10.5
+
+> Task :neoforge:createMinecraftArtifacts UP-TO-DATE
+
+> Task :neoforge:compileJava
+注: 某些输入文件使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+
+> Task :fabric:compileJava
+> Task :neoforge:processResources
+> Task :neoforge:classes
+> Task :neoforge:jarJar NO-SOURCE
+> Task :neoforge:jar
+> Task :neoforge:assemble
+> Task :neoforge:compileTestJava NO-SOURCE
+> Task :neoforge:processTestResources NO-SOURCE
+> Task :neoforge:testClasses UP-TO-DATE
+> Task :neoforge:test NO-SOURCE
+> Task :neoforge:check UP-TO-DATE
+> Task :neoforge:build
+> Task :fabric:processResources
+> Task :fabric:classes
+> Task :fabric:jar
+> Task :fabric:compileTestJava NO-SOURCE
+> Task :fabric:processIncludeJars UP-TO-DATE
+> Task :fabric:processTestResources NO-SOURCE
+> Task :fabric:testClasses UP-TO-DATE
+> Task :fabric:test NO-SOURCE
+> Task :fabric:validateAccessWidener UP-TO-DATE
+> Task :fabric:check UP-TO-DATE
+> Task :fabric:remapJar
+> Task :fabric:remapSourcesJar SKIPPED
+> Task :fabric:assemble
+> Task :fabric:build
+
+[Incubating] Problems report is available at: file:///D:/.Programs/.Program.Project/Basalt-Client/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 54s
+10 actionable tasks: 7 executed, 3 up-to-date

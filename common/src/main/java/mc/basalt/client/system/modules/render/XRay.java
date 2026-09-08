@@ -43,7 +43,7 @@ public class XRay extends Module {
     public void onEnable() {
         super.onEnable();
         BasaltClient.XRAY_ENABLED = true;
-        // 透视时附加夜视，保证矿洞可见（不覆盖 Fullbright 模块自身的状态）
+        // 透视时附加夜视
         BasaltClient.FULLBRIGHT_ENABLED = true;
         if (mc.level != null && mc.levelRenderer != null) {
             mc.levelRenderer.allChanged();
