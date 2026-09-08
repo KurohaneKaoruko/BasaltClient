@@ -13,6 +13,7 @@ import mc.basalt.client.system.modules.combat.AutoCrystal;
 import mc.basalt.client.system.modules.combat.AutoTotem;
 import mc.basalt.client.system.modules.combat.Criticals;
 import mc.basalt.client.system.modules.combat.Killaura;
+import mc.basalt.client.system.modules.combat.TriggerBot;
 import mc.basalt.client.system.modules.combat.Velocity;
 import mc.basalt.client.system.modules.misc.AntiAFK;
 import mc.basalt.client.system.modules.misc.Timer;
@@ -35,7 +36,9 @@ import mc.basalt.client.system.modules.render.ESP;
 import mc.basalt.client.system.modules.render.Freecam;
 import mc.basalt.client.system.modules.render.Fullbright;
 import mc.basalt.client.system.modules.render.Nametags;
+import mc.basalt.client.system.modules.render.NoWeather;
 import mc.basalt.client.system.modules.render.Tracers;
+import mc.basalt.client.system.modules.render.Zoom;
 import mc.basalt.client.system.modules.render.XRay;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFW;
@@ -43,9 +46,15 @@ import org.lwjgl.glfw.GLFW;
 public class Modules {
     private static final Modules INSTANCE = new Modules();
     private final List<Module> modules = new ArrayList<>();
+    private boolean initialized;
 
     public static Modules get() {
         return INSTANCE;
+    }
+
+    /** 模块列表是否已完成初始化（mixin 回调可能早于 init 调用）。 */
+    public static boolean initialized() {
+        return INSTANCE.initialized;
     }
 
     public void init() {
@@ -62,6 +71,7 @@ public class Modules {
         add(new AutoArmor());
         add(new AutoCrystal());
         add(new AutoClicker());
+        add(new TriggerBot());
 
         // Movement
         add(new Speed());
@@ -82,6 +92,8 @@ public class Modules {
         add(new Nametags());
         add(new Freecam());
         add(new XRay());
+        add(new Zoom());
+        add(new NoWeather());
 
         // Player
         add(new FastPlace());
@@ -91,6 +103,7 @@ public class Modules {
         add(new AutoRespawn());
         add(new AutoTool());
 
+        initialized = true;
         EventBus.subscribe(this);
     }
 

@@ -4,7 +4,9 @@ import mc.basalt.client.system.commands.impl.BindCommand;
 import mc.basalt.client.system.commands.impl.HelpCommand;
 import mc.basalt.client.system.commands.impl.HudCommand;
 import mc.basalt.client.system.commands.impl.PanicCommand;
+import mc.basalt.client.system.commands.impl.PresetCommand;
 import mc.basalt.client.system.commands.impl.SaveCommand;
+import mc.basalt.client.system.commands.impl.ThemeCommand;
 import mc.basalt.client.system.commands.impl.ToggleCommand;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -33,6 +35,8 @@ public class CommandManager {
         add(new HelpCommand());
         add(new HudCommand());
         add(new SaveCommand());
+        add(new ThemeCommand());
+        add(new PresetCommand());
     }
 
     private void add(Command command) {

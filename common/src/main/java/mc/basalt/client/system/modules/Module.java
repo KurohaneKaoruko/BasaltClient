@@ -45,6 +45,9 @@ public abstract class Module {
         }
     }
 
+    /** 批量应用状态（预设加载等场景）：跳过逐模块通知与保存。 */
+    public static boolean batchApplying;
+
     public void enable() {
         if (enabled) {
             return;
@@ -52,8 +55,10 @@ public abstract class Module {
         enabled = true;
         EventBus.subscribe(this);
         onEnable();
-        NotificationManager.success(getDisplayName(), "已开启");
-        saveIfInGame();
+        if (!batchApplying) {
+            NotificationManager.success(getDisplayName(), "已开启");
+            saveIfInGame();
+        }
     }
 
     public void disable() {
@@ -63,8 +68,10 @@ public abstract class Module {
         enabled = false;
         EventBus.unsubscribe(this);
         onDisable();
-        NotificationManager.show(getDisplayName(), "已关闭", NotificationManager.Type.INFO, 1500);
-        saveIfInGame();
+        if (!batchApplying) {
+            NotificationManager.show(getDisplayName(), "已关闭", NotificationManager.Type.INFO, 1500);
+            saveIfInGame();
+        }
     }
 
     /** 游戏内开关模块时立即持久化（配置加载阶段不触发）。 */

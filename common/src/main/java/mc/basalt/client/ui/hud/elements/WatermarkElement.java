@@ -2,6 +2,7 @@ package mc.basalt.client.ui.hud.elements;
 
 import mc.basalt.client.BasaltClient;
 import mc.basalt.client.ui.hud.HudElement;
+import mc.basalt.client.ui.theme.ThemeManager;
 import net.minecraft.client.gui.GuiGraphics;
 
 public class WatermarkElement extends HudElement {
@@ -15,7 +16,7 @@ public class WatermarkElement extends HudElement {
 
     @Override
     public void render(GuiGraphics context, float tickDelta) {
-        context.drawString(mc.font, text(), getX(), getY(), 0xFFA060F0);
+        context.drawString(mc.font, text(), getX(), getY(), ThemeManager.get().accent());
     }
 
     @Override

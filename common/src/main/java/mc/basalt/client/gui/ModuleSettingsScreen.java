@@ -7,6 +7,7 @@ import mc.basalt.client.system.settings.BooleanSetting;
 import mc.basalt.client.system.settings.DoubleSetting;
 import mc.basalt.client.system.settings.ModeSetting;
 import mc.basalt.client.system.settings.Setting;
+import mc.basalt.client.ui.theme.ThemeManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -34,10 +35,10 @@ public class ModuleSettingsScreen extends Screen {
     private static final int BUTTON_NORMAL_BG = new Color(30, 30, 30, 255).getRGB();
     private static final int BUTTON_HOVER_BG = new Color(50, 50, 50, 255).getRGB();
     private static final int BUTTON_BORDER = new Color(80, 80, 80, 255).getRGB();
-    private static final int BUTTON_BORDER_HOVER = new Color(160, 96, 240, 255).getRGB();
+    
 
     private static final int SLIDER_BG = new Color(40, 40, 40, 255).getRGB();
-    private static final int SLIDER_FILL = new Color(160, 96, 240, 255).getRGB();
+    
 
     private static final int CONTENT_WIDTH = 220;
     private static final int ROW_HEIGHT = 24;
@@ -285,7 +286,7 @@ public class ModuleSettingsScreen extends Screen {
         public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
             boolean hovered = this.isHovered();
             int bgColor = hovered ? BUTTON_HOVER_BG : BUTTON_NORMAL_BG;
-            int borderColor = hovered ? BUTTON_BORDER_HOVER : BUTTON_BORDER;
+            int borderColor = hovered ? ThemeManager.get().accent() : BUTTON_BORDER;
             int textColor = hovered ? 0xFFFFFF : 0xDDDDDD;
 
             context.fill(getX(), getY(), getX() + this.width, getY() + this.height, bgColor);
@@ -318,12 +319,12 @@ public class ModuleSettingsScreen extends Screen {
             boolean hovered = this.isHovered();
 
             context.fill(getX(), getY(), getX() + this.width, getY() + this.height, SLIDER_BG);
-            GuiUtil.border(context, getX(), getY(), this.width, this.height, hovered ? BUTTON_BORDER_HOVER : BUTTON_BORDER);
+            GuiUtil.border(context, getX(), getY(), this.width, this.height, hovered ? ThemeManager.get().accent() : BUTTON_BORDER);
 
             double range = setting.getMax() - setting.getMin();
             double percent = range <= 0 ? 0 : (setting.get() - setting.getMin()) / range;
             int fillWidth = (int) (this.width * percent);
-            context.fill(getX(), getY(), getX() + fillWidth, getY() + this.height, SLIDER_FILL);
+            context.fill(getX(), getY(), getX() + fillWidth, getY() + this.height, ThemeManager.get().accent());
 
             int textWidth = Minecraft.getInstance().font.width(getMessage());
             int textX = getX() + (this.width - textWidth) / 2;

@@ -14,6 +14,7 @@ import mc.basalt.client.system.settings.ModeSetting;
 import mc.basalt.client.system.settings.Setting;
 import mc.basalt.client.ui.hud.HudElement;
 import mc.basalt.client.ui.hud.HudManager;
+import mc.basalt.client.ui.theme.ThemeManager;
 
 import java.io.File;
 import java.io.FileReader;
@@ -54,6 +55,16 @@ public class ConfigManager {
         }
 
         json.add("modules", modulesJson);
+
+        // 主题设置
+        JsonObject themeJson = new JsonObject();
+        themeJson.addProperty("accentColor", Integer.toHexString(ThemeManager.get().getAccentColor()));
+        themeJson.addProperty("rainbow", ThemeManager.get().isRainbow());
+        themeJson.addProperty("rainbowSpeed", ThemeManager.get().getRainbowSpeed());
+        themeJson.addProperty("listMode", ThemeManager.get().getListMode());
+        themeJson.addProperty("hudBackground", ThemeManager.get().isHudBackgroundEnabled());
+        themeJson.addProperty("hudBackgroundAlpha", ThemeManager.get().getHudBackgroundAlpha());
+        json.add("theme", themeJson);
 
         // HUD 布局（锚点 + 偏移，分辨率无关）
         JsonObject hudJson = new JsonObject();
@@ -119,6 +130,32 @@ public class ConfigManager {
                             }
                         }
                     }
+                }
+            }
+
+            // 主题设置
+            if (json.has("theme")) {
+                try {
+                    JsonObject themeJson = json.getAsJsonObject("theme");
+                    if (themeJson.has("accentColor")) {
+                        ThemeManager.get().setAccentColor((int) (0xFF000000L | Long.parseLong(themeJson.get("accentColor").getAsString(), 16)));
+                    }
+                    if (themeJson.has("rainbow")) {
+                        ThemeManager.get().setRainbow(themeJson.get("rainbow").getAsBoolean());
+                    }
+                    if (themeJson.has("rainbowSpeed")) {
+                        ThemeManager.get().setRainbowSpeed(themeJson.get("rainbowSpeed").getAsFloat());
+                    }
+                    if (themeJson.has("listMode")) {
+                        ThemeManager.get().setListMode(themeJson.get("listMode").getAsInt());
+                    }
+                    if (themeJson.has("hudBackground")) {
+                        ThemeManager.get().setHudBackgroundEnabled(themeJson.get("hudBackground").getAsBoolean());
+                    }
+                    if (themeJson.has("hudBackgroundAlpha")) {
+                        ThemeManager.get().setHudBackgroundAlpha(themeJson.get("hudBackgroundAlpha").getAsFloat());
+                    }
+                } catch (Exception ignored) {
                 }
             }
 
