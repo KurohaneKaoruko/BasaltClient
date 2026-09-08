@@ -26,4 +26,10 @@ public class MixinMinecraft {
         // 退出游戏时保存配置（加载器无关）
         ConfigManager.save();
     }
+
+    @Inject(method = "destroy", at = @At("HEAD"))
+    private void onDestroy(CallbackInfo ci) {
+        // 兜底：部分退出路径不经过 stop()，destroy() 时再保存一次
+        ConfigManager.save();
+    }
 }

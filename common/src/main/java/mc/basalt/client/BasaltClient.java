@@ -42,6 +42,7 @@ public final class BasaltClient {
     public static KeyMapping HUD_EDITOR_KEY;
 
     private CommandManager commandManager;
+    private int autosaveTimer;
 
     private BasaltClient() {
     }
@@ -112,6 +113,12 @@ public final class BasaltClient {
             if (MC.screen == null) {
                 MC.setScreen(new HudEditorScreen());
             }
+        }
+
+        // 定时自动保存（每 600 tick ≈ 30 秒），保证任何退出方式下配置不丢失
+        if (++autosaveTimer >= 600) {
+            autosaveTimer = 0;
+            ConfigManager.save();
         }
     }
 }
