@@ -8,7 +8,7 @@ import mc.basalt.client.system.modules.Module;
 
 public class FastPlace extends Module {
     public FastPlace() {
-        super("FastPlace", "快速放置", "Removes place delay", Category.Player);
+        super("FastPlace", "快速放置", "移除方块放置延迟。", Category.Player);
     }
 
     @EventHandler

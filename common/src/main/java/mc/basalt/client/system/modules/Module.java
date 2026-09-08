@@ -1,6 +1,7 @@
 package mc.basalt.client.system.modules;
 
 import mc.basalt.client.event.EventBus;
+import mc.basalt.client.system.config.ConfigManager;
 import mc.basalt.client.system.settings.Setting;
 import mc.basalt.client.ui.notifications.NotificationManager;
 import net.minecraft.client.Minecraft;
@@ -52,6 +53,7 @@ public abstract class Module {
         EventBus.subscribe(this);
         onEnable();
         NotificationManager.success(getDisplayName(), "已开启");
+        saveIfInGame();
     }
 
     public void disable() {
@@ -62,6 +64,14 @@ public abstract class Module {
         EventBus.unsubscribe(this);
         onDisable();
         NotificationManager.show(getDisplayName(), "已关闭", NotificationManager.Type.INFO, 1500);
+        saveIfInGame();
+    }
+
+    /** 游戏内开关模块时立即持久化（配置加载阶段不触发）。 */
+    private void saveIfInGame() {
+        if (mc != null && mc.player != null) {
+            ConfigManager.save();
+        }
     }
 
     public void onEnable() {

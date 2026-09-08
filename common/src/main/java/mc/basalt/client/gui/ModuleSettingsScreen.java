@@ -181,11 +181,8 @@ public class ModuleSettingsScreen extends Screen {
 
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        if (parent != null) {
-            parent.render(context, -1, -1, delta);
-        }
-
-        context.fill(0, 0, this.width, this.height, 0x80000000);
+        // 独立模态弹窗：不重绘父级界面，避免 1.21.2+ 毛玻璃/背景合成层级问题
+        context.fill(0, 0, this.width, this.height, 0xB0000000);
         context.fill(windowX, windowY, windowX + windowWidth, windowY + windowHeight, WINDOW_BG);
         GuiUtil.border(context, windowX, windowY, windowWidth, windowHeight, BORDER_COLOR);
 
@@ -215,6 +212,11 @@ public class ModuleSettingsScreen extends Screen {
                     windowY + windowHeight - 42,
                     ACCENT_COLOR);
         }
+    }
+
+    /** 禁用原版背景（毛玻璃/泥土纹理），弹窗使用自身遮罩。 */
+    @Override
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
     }
 
     @Override
