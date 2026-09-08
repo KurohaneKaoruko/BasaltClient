@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+MixinConfigs: basalt-client-neoforge.mixins.json
+

@@ -1,18 +1,37 @@
 # Basalt Client (玄武岩客户端)
 
-一个 Minecraft Java 版的客户端辅助 MOD（Fabric），包含多项作弊/辅助功能。
+一个 Minecraft Java 版的客户端辅助 MOD，同时支持 **Fabric** 与 **NeoForge** 加载器。
 
 - **游戏版本**: Minecraft 1.21.1
-- **加载器**: Fabric Loader 0.16.14+
-- **依赖**: Fabric API
+- **加载器**: Fabric Loader 0.16.14+ / NeoForge 21.1.x
+- **Java**: 21+
+
+## 项目结构（多加载器单仓库）
+
+```
+common/    共享源码（事件系统、模块、GUI、HUD、mixin）——使用 Mojang 官方映射
+fabric/    Fabric 模块（Loom 构建，入口适配器 + fabric.mod.json + Access Widener）
+neoforge/  NeoForge 模块（ModDevGradle 构建，@Mod 入口 + neoforge.mods.toml + Access Transformer）
+```
+
+两个加载器模块都把 `common` 并入各自的源码集，基于同一份代码分别编译打包。
+原版调用集中在 mixin 与渲染工具层，模块逻辑只依赖自建事件总线，便于后续多版本移植。
 
 ## 构建
 
 ```bash
 ./gradlew build
+# 产物：
+#   fabric/build/libs/basalt-client-fabric-<版本>.jar
+#   neoforge/build/libs/basalt-client-neoforge-<版本>.jar
 ```
 
-产物位于 `build/libs/`。
+开发运行：
+
+```bash
+./gradlew :fabric:runClient
+./gradlew :neoforge:runClient
+```
 
 ## 使用
 
@@ -54,7 +73,7 @@ ClickGUI 内：**左键** 开关模块，**右键** 打开设置，**中键** �
 - **Tracers** 实体连线 — 屏幕中心追踪线
 - **Nametags** 名牌显示 — 透墙名牌 + 血量/距离
 - **Fullbright** 夜视
-- **XRay** 矿物透视 — 仅显示矿物
+- **XRay** 矿物透视 — 只显示矿物
 - **Freecam** 自由视角 — 相机脱离身体，身体原地冻结
 
 ### Player（玩家）
@@ -70,12 +89,18 @@ ClickGUI 内：**左键** 开关模块，**右键** 打开设置，**中键** �
 - **AntiAFK** 防挂机 — 定时动作避免被踢
 
 ### HUD
-- 水印 / 模块列表 / 坐标与 FPS / 护甲状态，位置可通过 HUD 编辑器自由拖拽并持久化
+- 水印 / 模块列表 / 坐标与 FPS / 护甲状态，锚点定位分辨率自适应，可拖拽并持久化
 - 右下角弹出通知（模块开关、命令反馈）
 
 ## 配置
 
-配置保存在 `.minecraft/basalt/config.json`，包含模块开关、按键、设置与 HUD 布局，退出游戏自动保存。
+配置保存在 `.minecraft/basalt/config.json`（两种加载器共用同一位置与格式），包含模块开关、按键、设置与 HUD 布局，退出游戏自动保存。
+
+## 多版本开发约定
+
+- `main` 始终跟随最新支持的 MC 版本；旧版本使用 `MC<x.y.z>` 维护分支，仅通过 cherry-pick 同步修复
+- 发布版本号格式 `模组版本+MC版本`（如 `0.3.0+1.21.1`），与 tag 一致
+- 升级 MC 版本：切新分支 → 更新 `gradle.properties` 中版本四件套 → 修复编译（集中在 `common/.../mixin/` 与渲染工具）→ 双加载器 `runClient` 验证 → `main` 跟进
 
 ## 声明
 

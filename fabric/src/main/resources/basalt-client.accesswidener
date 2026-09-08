@@ -1,0 +1,4 @@
+accessWidener v2 named
+# NoFall 需要修改移动包的 onGround 字段（原为 protected final，Mojang 映射路径）
+accessible field net/minecraft/network/protocol/game/ServerboundMovePlayerPacket onGround Z
+mutable field net/minecraft/network/protocol/game/ServerboundMovePlayerPacket onGround Z

@@ -1,4 +1,0 @@
-accessWidener v2 named
-# NoFall 需要修改移动包的 onGround 字段（原为 protected final）
-accessible field net/minecraft/network/packet/c2s/play/PlayerMoveC2SPacket onGround Z
-mutable field net/minecraft/network/packet/c2s/play/PlayerMoveC2SPacket onGround Z

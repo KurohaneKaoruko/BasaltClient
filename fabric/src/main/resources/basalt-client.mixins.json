@@ -1,0 +1,24 @@
+{
+	"required": true,
+	"package": "mc.basalt.client.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"MixinConnection",
+		"MixinPlayerEntity",
+		"MixinBlock"
+	],
+	"client": [
+		"MixinMinecraft",
+		"MixinLevelRenderer",
+		"MixinKeyboard",
+		"MixinGui",
+		"MixinCamera",
+		"MixinDeltaTracker",
+		"MixinLightTexture",
+		"MixinClientPacketListener",
+		"IMinecraftAccessor"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

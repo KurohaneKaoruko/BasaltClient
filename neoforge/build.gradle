@@ -1,0 +1,59 @@
+plugins {
+	id 'net.neoforged.moddev' version "${moddev_version}"
+}
+
+version = project.mod_version
+base {
+	archivesName = "basalt-client-neoforge"
+}
+
+// 共享源码集：本模块 + common
+sourceSets {
+	main {
+		java {
+			srcDirs = ['src/main/java', '../common/src/main/java']
+		}
+		resources {
+			srcDirs = ['src/main/resources', '../common/src/main/resources']
+		}
+	}
+}
+
+neoForge {
+	version = project.neoforge_version
+
+	// 显式声明 dev 模块的源集（common 通过 srcDirs 并入 main），
+	// 否则 mixin 类不在 mod 类加载器可见范围
+	mods {
+		basaltclient {
+			sourceSet(sourceSets.main)
+		}
+	}
+
+	runs {
+		client {
+			client()
+		}
+	}
+}
+
+// Access Transformer（NoFall 需要 onGround 可写）
+neoForge.accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
+
+tasks.withType(JavaCompile).configureEach {
+	it.inputs.dir('../common/src/main/java')
+}
+
+jar {
+	// 资源中的 MANIFEST.MF 仅供 dev 运行使用，打包时使用生成的 manifest
+	exclude 'META-INF/MANIFEST.MF'
+	manifest {
+		attributes([
+				'Implementation-Version': project.version,
+				'MixinConfigs'           : 'basalt-client-neoforge.mixins.json'
+		])
+	}
+	from("../LICENSE") {
+		rename { "${it}_basalt-client" }
+	}
+}

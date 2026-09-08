@@ -1,0 +1,28 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "GPL-3.0-or-later"
+issueTrackerURL = "https://github.com/kurohanekaoruko/BasaltClient/issues"
+
+[[mods]]
+modId = "basaltclient"
+version = "${file.jarVersion}"
+displayName = "玄武岩CLIENT"
+description = '''
+拥有多项辅助功能的客户端模组。'''
+authors = "Kaoruko"
+displayURL = "https://github.com/kurohanekaoruko/BasaltClient"
+logoFile = "assets/basalt-client/icon.png"
+
+[[dependencies.basaltclient]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1.0,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.basaltclient]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,1.22)"
+ordering = "NONE"
+side = "CLIENT"

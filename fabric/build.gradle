@@ -1,0 +1,50 @@
+plugins {
+	id 'fabric-loom' version "${loom_version}"
+}
+
+version = project.mod_version
+base {
+	archivesName = "basalt-client-fabric"
+}
+
+loom {
+	accessWidenerPath = file("src/main/resources/basalt-client.accesswidener")
+}
+
+// 共享源码集：本模块 + common
+sourceSets {
+	main {
+		java {
+			srcDirs = ['src/main/java', '../common/src/main/java']
+		}
+		resources {
+			srcDirs = ['src/main/resources', '../common/src/main/resources']
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	// Fabric 与 NeoForge 共用 Mojang 官方映射，common 源码无需两套名字
+	mappings loom.officialMojangMappings()
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
+
+processResources {
+	inputs.property "version", project.version
+	filesMatching("fabric.mod.json") {
+		expand "version": inputs.properties.version
+	}
+}
+
+// common 源码变化时也触发重新编译
+tasks.withType(JavaCompile).configureEach {
+	it.inputs.dir('../common/src/main/java')
+}
+
+jar {
+	from("../LICENSE") {
+		rename { "${it}_basalt-client" }
+	}
+}
