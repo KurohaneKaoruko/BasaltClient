@@ -106,6 +106,18 @@ public class Modules {
         add(new AutoTool());
         add(new mc.basalt.client.system.modules.player.AutoMine());
 
+        // World
+        add(new mc.basalt.client.system.modules.world.AutoShear());
+        add(new mc.basalt.client.system.modules.world.AutoDoor());
+        add(new mc.basalt.client.system.modules.world.AutoMount());
+        add(new mc.basalt.client.system.modules.world.AutoNametag());
+        add(new mc.basalt.client.system.modules.world.Nuker());
+        add(new mc.basalt.client.system.modules.world.LiquidFiller());
+        add(new mc.basalt.client.system.modules.world.BonemealAura());
+        add(new mc.basalt.client.system.modules.world.AutoFish());
+        add(new mc.basalt.client.system.modules.world.StashFinder());
+        add(new mc.basalt.client.system.modules.world.AutoReplant());
+
         initialized = true;
         EventBus.subscribe(this);
     }

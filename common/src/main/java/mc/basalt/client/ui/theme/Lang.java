@@ -45,7 +45,17 @@ public final class Lang {
             Map.entry("Blink", "Holds packets and sends them at once on disable."),
             Map.entry("AutoEat", "Automatically eats when hungry."),
             Map.entry("AutoRespawn", "Automatically respawns on death."),
-            Map.entry("AutoTool", "Switches to the fastest tool when mining."));
+            Map.entry("AutoTool", "Switches to the fastest tool when mining."),
+            Map.entry("AutoShear", "Auto-shears nearby sheep with shears."),
+            Map.entry("AutoDoor", "Opens doors and trap doors automatically."),
+            Map.entry("AutoMount", "Auto-mounts rideable entities nearby."),
+            Map.entry("AutoNametag", "Names namable entities with held name tag."),
+            Map.entry("Nuker", "Breaks blocks in a configurable radius."),
+            Map.entry("LiquidFiller", "Auto-fills liquids with blocks in range."),
+            Map.entry("BonemealAura", "Uses bone meal on crops and saplings."),
+            Map.entry("AutoFish", "Reels and recasts fishing rod automatically."),
+            Map.entry("StashFinder", "Notifies when chunks contain many containers."),
+            Map.entry("AutoReplant", "Re-harvests and replants crops automatically."));
 
     private Lang() {
     }
