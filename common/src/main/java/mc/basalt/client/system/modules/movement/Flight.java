@@ -30,26 +30,23 @@ public class Flight extends Module {
         if (!inLiquids.get() && (mc.player.isInWater() || mc.player.isInLava())) return;
 
         switch (mode.get()) {
-            case "Vanilla" -> vanillaFlight();
+            case "Vanilla" -> {
+                // 只允许飞行，不强制 flying=true（保留原版双击空格切换）
+                mc.player.getAbilities().mayfly = true;
+                mc.player.getAbilities().setFlyingSpeed(
+                        speed.get().floatValue() * (float) DEFAULT_FLY_SPEED);
+            }
             case "Static" -> staticFlight();
             case "Jetpack" -> jetpack();
             case "Glide" -> glide();
         }
 
-        if (antiKick.get()) {
+        if (antiKick.get() && mc.player.getAbilities().flying) {
             antiKickTimer++;
             if (antiKickTimer >= 80) {
                 antiKickTimer = 0;
                 mc.player.setDeltaMovement(mc.player.getDeltaMovement().x, -0.04, mc.player.getDeltaMovement().z);
             }
-        }
-    }
-
-    private void vanillaFlight() {
-        mc.player.getAbilities().mayfly = true;
-        mc.player.getAbilities().setFlyingSpeed(speed.get().floatValue() * (float) DEFAULT_FLY_SPEED);
-        if (!mc.player.getAbilities().flying) {
-            mc.player.getAbilities().flying = true;
         }
     }
 
