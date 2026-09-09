@@ -1,4 +1,3 @@
-Starting a Gradle Daemon, 1 busy and 1 stopped Daemons could not be reused, use --status for details
 
 > Configure project :fabric
 Fabric Loom: 1.10.5
@@ -9,8 +8,7 @@ Fabric Loom: 1.10.5
 注: 某些输入文件使用或覆盖了已过时的 API。
 注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
 
-> Task :fabric:compileJava
-> Task :neoforge:processResources
+> Task :neoforge:processResources UP-TO-DATE
 > Task :neoforge:classes
 > Task :neoforge:jarJar NO-SOURCE
 > Task :neoforge:jar
@@ -21,7 +19,8 @@ Fabric Loom: 1.10.5
 > Task :neoforge:test NO-SOURCE
 > Task :neoforge:check UP-TO-DATE
 > Task :neoforge:build
-> Task :fabric:processResources
+> Task :fabric:compileJava
+> Task :fabric:processResources UP-TO-DATE
 > Task :fabric:classes
 > Task :fabric:jar
 > Task :fabric:compileTestJava NO-SOURCE
@@ -38,5 +37,5 @@ Fabric Loom: 1.10.5
 
 [Incubating] Problems report is available at: file:///D:/.Programs/.Program.Project/Basalt-Client/build/reports/problems/problems-report.html
 
-BUILD SUCCESSFUL in 54s
-10 actionable tasks: 7 executed, 3 up-to-date
+BUILD SUCCESSFUL in 10s
+10 actionable tasks: 5 executed, 5 up-to-date
