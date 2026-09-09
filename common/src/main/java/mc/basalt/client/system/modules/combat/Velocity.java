@@ -66,12 +66,11 @@ public class Velocity extends Module {
             switch (mode.get()) {
                 case "取消" -> event.cancel();
                 case "百分比" -> {
-                    var velOpt = explodePacket.playerKnockback();
-                    if (velOpt.isPresent()) { Vec3 vel = velOpt.get();
-                        event.cancel();
-                        mc.player.setDeltaMovement(mc.player.getDeltaMovement().add(
-                            vel.x * exH.get() * 0.01, vel.y * exV.get() * 0.01, vel.z * exH.get() * 0.01));
-                    }
+                    event.cancel();
+                    mc.player.setDeltaMovement(mc.player.getDeltaMovement().add(
+                        explodePacket.getKnockbackX() * exH.get() * 0.01,
+                        explodePacket.getKnockbackY() * exV.get() * 0.01,
+                        explodePacket.getKnockbackZ() * exH.get() * 0.01));
                 }
                 case "反转" -> event.cancel();
             }

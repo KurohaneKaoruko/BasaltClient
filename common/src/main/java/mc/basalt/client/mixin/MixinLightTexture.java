@@ -4,20 +4,6 @@ import mc.basalt.client.BasaltClient;
 import net.minecraft.client.renderer.LightTexture;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-<<<<<<< HEAD
-import org.spongepowered.asm.mixin.injection.ModifyArgs;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
-
-@Mixin(LightTexture.class)
-public class MixinLightTexture {
-    @ModifyArgs(method = "updateLightTexture", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/NativeImage;setPixelRGBA(III)V"))
-    private void updateColor(Args args) {
-        if (BasaltClient.FULLBRIGHT_ENABLED) {
-            args.set(2, 0xFFFFFFFF);
-        }
-    }
-}
-=======
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -34,4 +20,3 @@ public class MixinLightTexture {
         }
     }
 }
->>>>>>> 975c8d3 (fix: 夜视改为 getLightColor 逐顶点光照拦截 (v0.5.1))
