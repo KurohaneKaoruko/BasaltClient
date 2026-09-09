@@ -82,6 +82,7 @@ public class Modules {
         add(new Scaffold());
         add(new SafeWalk());
         add(new EntityControl());
+        add(new mc.basalt.client.system.modules.movement.LongJump());
 
         // Misc
         add(new Timer());
@@ -95,6 +96,7 @@ public class Modules {
         add(new XRay());
         add(new Zoom());
         add(new NoWeather());
+        add(new mc.basalt.client.system.modules.render.NoRender());
 
         // Player
         add(new FastPlace());
@@ -103,6 +105,7 @@ public class Modules {
         add(new AutoEat());
         add(new AutoRespawn());
         add(new AutoTool());
+        add(new mc.basalt.client.system.modules.player.AutoMine());
 
         initialized = true;
         EventBus.subscribe(this);

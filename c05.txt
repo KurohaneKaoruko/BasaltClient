@@ -37,5 +37,5 @@ Fabric Loom: 1.10.5
 
 [Incubating] Problems report is available at: file:///D:/.Programs/.Program.Project/Basalt-Client/build/reports/problems/problems-report.html
 
-BUILD SUCCESSFUL in 10s
+BUILD SUCCESSFUL in 11s
 10 actionable tasks: 5 executed, 5 up-to-date
