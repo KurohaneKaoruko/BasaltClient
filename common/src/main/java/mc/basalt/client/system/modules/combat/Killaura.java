@@ -30,7 +30,7 @@ public class Killaura extends Module {
 
     private final DoubleSetting range = new DoubleSetting("距离", 4.5, 1.0, 6.0, 0.1);
     private final DoubleSetting wallsRange = new DoubleSetting("穿墙距离", 3.5, 0.0, 6.0, 0.1);
-    private final DoubleSetting fov = new DoubleSetting("视野角度", 180.0, 30.0, 360.0, 10.0);
+    private final DoubleSetting fov = new DoubleSetting("视野角度", 360.0, 30.0, 360.0, 10.0);
 
     private final BooleanSetting players = new BooleanSetting("攻击玩家", true);
     private final BooleanSetting mobs = new BooleanSetting("攻击怪物", true);
