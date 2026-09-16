@@ -72,6 +72,9 @@ public class Modules {
         add(new AutoCrystal());
         add(new AutoClicker());
         add(new TriggerBot());
+        add(new mc.basalt.client.system.modules.combat.AimAssist());
+        add(new mc.basalt.client.system.modules.combat.HitBoxes());
+        add(new mc.basalt.client.system.modules.combat.Reach());
 
         // Movement
         add(new Speed());
@@ -82,6 +85,7 @@ public class Modules {
         add(new SafeWalk());
         add(new EntityControl());
         add(new mc.basalt.client.system.modules.movement.LongJump());
+        add(new mc.basalt.client.system.modules.movement.NoSlow());
 
         // Misc
         add(new Timer());
@@ -105,6 +109,7 @@ public class Modules {
         add(new AutoRespawn());
         add(new AutoTool());
         add(new mc.basalt.client.system.modules.player.AutoMine());
+        add(new mc.basalt.client.system.modules.player.AntiHunger());
 
         // World
         add(new mc.basalt.client.system.modules.world.AutoShear());

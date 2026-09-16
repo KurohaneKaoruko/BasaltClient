@@ -35,6 +35,10 @@ public final class BasaltClient {
     public static boolean SAFEWALK_ENABLED = false;
     public static boolean FULLBRIGHT_ENABLED = false;
     public static boolean XRAY_ENABLED = false;
+    public static boolean NOSLOW_ENABLED = false;
+    public static boolean HITBOXES_ENABLED = false;
+    public static float HITBOXES_VALUE = 0.0f;
+    public static double REACH_VALUE = -1.0; // -1 = 未启用
     public static double FREECAM_X, FREECAM_Y, FREECAM_Z;
     public static float FREECAM_YAW, FREECAM_PITCH;
 

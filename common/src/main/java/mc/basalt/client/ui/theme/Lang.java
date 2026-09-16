@@ -55,7 +55,15 @@ public final class Lang {
             Map.entry("BonemealAura", "Uses bone meal on crops and saplings."),
             Map.entry("AutoFish", "Reels and recasts fishing rod automatically."),
             Map.entry("StashFinder", "Notifies when chunks contain many containers."),
-            Map.entry("AutoReplant", "Re-harvests and replants crops automatically."));
+            Map.entry("AutoReplant", "Re-harvests and replants crops automatically."),
+            Map.entry("AimAssist", "Smoothly aims at nearby targets (legit-style)."),
+            Map.entry("HitBoxes", "Expands entity hitboxes for easier hits."),
+            Map.entry("Reach", "Extends attack and interaction range."),
+            Map.entry("NoSlow", "No slowdown while using items."),
+            Map.entry("AntiHunger", "Reduces server-side hunger drain."),
+            Map.entry("LongJump", "Boosts horizontal jump distance."),
+            Map.entry("NoRender", "Removes various screen overlays."),
+            Map.entry("AutoMine", "Automatically mines targeted blocks."));
 
     private Lang() {
     }
